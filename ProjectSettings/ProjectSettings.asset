@@ -842,8 +842,8 @@ PlayerSettings:
   editorAssembliesCompatibilityLevel: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: pueblo-tag-game 1p
-  metroPackageVersion: 
+  metroPackageName: pueblo-tag-game1p
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
@@ -851,7 +851,7 @@ PlayerSettings:
   metroCertificateNotAfter: 0000000000000000
   metroApplicationDescription: pueblo-tag-game 1p
   wsaImages: {}
-  metroTileShortName: 
+  metroTileShortName: pueblo-tag-game 1p
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0
@@ -918,7 +918,7 @@ PlayerSettings:
   qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
   captureStartupLogs: {}
-  activeInputHandler: 1
+  activeInputHandler: 2
   windowsGamepadBackendHint: 0
   cloudProjectId: 9e9b58dc-2c4f-401d-919a-fe648a7e776b
   framebufferDepthMemorylessMode: 0
