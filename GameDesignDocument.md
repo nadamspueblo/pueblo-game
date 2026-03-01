@@ -26,13 +26,13 @@
 * Find/create scenery assets - trees, bushes, debris, desks, chairs, etc
 * Build out scenes
 
-**4. The Health & Stats System (Next Priority)**
+**4. The Health & Stats System (✅ IN PROGRESS)**
 * Create a universal `HealthManager` script attached to both the Player and Zombies.
 * Track Max Health, Current Health, and handle a `TakeDamage()` function.
 * **Player Death:** Triggers a "Game Over" screen.
 * **Zombie Death:** Triggers a ragdoll physics effect or death animation, eventually destroys the zombie object.
 
-**5. Basic Combat System**
+**5. Basic Combat System (✅ IN PROGRESS)**
 * Give the player a starting weapon (e.g., a baseball bat).
 * Use Unity **Animation Events** to turn on a weapon "hitbox" only during the exact frames of the swing animation.
 * If the hitbox collides with a zombie, trigger the zombie's `TakeDamage()` function.
