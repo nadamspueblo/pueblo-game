@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.AI; // Required for NavMesh
 
@@ -11,9 +10,12 @@ public class ZombieRomeroAI : MonoBehaviour
 
   [Header("Chasing & Combat")]
   public Transform targetToChase; // Drag the Player here in the Inspector
+  public float walkSpeed = 1f;
   public float chaseDistance = 15f;
+  public float chaseSpeed = 2f;
   public float rushDistance = 5f;
-  public float attackDistance = 2f;
+  public float rushSpeed = 4f;
+  public float attackDistance = 1.5f;
   public float attackCooldown = 2f;
 
   private float speed = 1f;
@@ -61,6 +63,7 @@ public class ZombieRomeroAI : MonoBehaviour
     if (distanceToTarget <= attackDistance)
     {
       // We are close enough! But is our cooldown finished?
+      speed = 0f;
       if (Time.time >= lastAttackTime + attackCooldown)
       {
         PlayAttackSound();
@@ -73,24 +76,64 @@ public class ZombieRomeroAI : MonoBehaviour
         animator.SetFloat("VelocityZ", 0f, 0.1f, Time.deltaTime);
       }
     }
-    else if (distanceToTarget <= rushDistance)
-    {
-      if (!hasRushed)
-      {
-        PlayRushSound();
-        hasRushed = true;
-      }
-      RushTarget();
-    }
     else if (distanceToTarget <= chaseDistance)
     {
-      if (!hasAlerted)
+      float trueWalkingDistance = GetActualPathDistance(targetToChase.position);
+      float distToObstacle = GetDistanceToClosetObstacle(targetToChase.position);
+
+      if (trueWalkingDistance <= rushDistance)
       {
-          PlayAlertSound();
-          hasAlerted = true; 
+        if (!hasRushed)
+        {
+          PlayRushSound();
+          hasRushed = true;
+        }
+        RushTarget();
       }
-      hasRushed = false;
-      ChaseTarget();
+      else if (trueWalkingDistance <= chaseDistance)
+      {
+        if (!hasAlerted)
+        {
+          PlayAlertSound();
+          hasAlerted = true;
+        }
+        hasRushed = false;
+        ChaseTarget();
+      }
+      else if (distToObstacle > 0.5f && distToObstacle < chaseDistance)
+      {
+        hasRushed = false;
+        ChaseTarget();
+        HandleIdleGrowls();
+      }
+      else if (distanceToTarget < rushDistance)
+      {
+        if (!hasRushed)
+        {
+          PlayRushSound();
+          hasRushed = true;
+        }
+        FaceTarget();
+        if (Time.time >= lastAttackTime + attackCooldown + Random.Range(2f, 5f))
+        {
+            PlayAttackSound();
+            AttackTarget();
+            speed = 0f;
+            animator.SetFloat("VelocityZ", speed, 0.1f, Time.deltaTime);
+        }
+      }
+      else
+      {
+        agent.ResetPath(); // Delete the GPS route so it stops walking!
+        speed = 0f;
+
+        HandleIdleGrowls();
+        FaceTarget();
+        animator.SetFloat("VelocityZ", 0f, 0.1f, Time.deltaTime);
+
+        hasRushed = false;
+        hasAlerted = false;
+      }
     }
     else
     {
@@ -109,6 +152,7 @@ public class ZombieRomeroAI : MonoBehaviour
 
   private void AttackTarget()
   {
+    speed = 0f;
     // Look at the player so the zombie doesn't attack thin air
     FaceTarget();
 
@@ -131,19 +175,20 @@ public class ZombieRomeroAI : MonoBehaviour
   private void ChaseTarget()
   {
     // Tell the AI to move to the target's exact position
-    speed = 1f;
+    speed = chaseSpeed;
     agent.SetDestination(targetToChase.position);
   }
 
   private void RushTarget()
   {
     agent.SetDestination(targetToChase.position);
-    speed = 3.5f;
+    speed = rushSpeed;
   }
 
   private void WanderAround()
   {
     timer += Time.deltaTime;
+    speed = walkSpeed;
 
     // If it's time to pick a new random spot...
     if (timer >= wanderTimer)
@@ -223,5 +268,48 @@ public class ZombieRomeroAI : MonoBehaviour
     NavMesh.SamplePosition(randDirection, out navHit, dist, layermask);
 
     return navHit.position;
+  }
+
+  private float GetActualPathDistance(Vector3 targetPosition)
+  {
+    NavMeshPath path = new NavMeshPath();
+
+    // Ask the NavMesh to draw a path from the zombie to the target
+    if (NavMesh.CalculatePath(transform.position, targetPosition, NavMesh.AllAreas, path))
+    {
+      if (path.status != NavMeshPathStatus.PathComplete)
+      {
+        return Mathf.Infinity; // The player is unreachable!
+      }
+
+      float distance = 0f;
+
+      // Measure the length of every line segment in the path
+      for (int i = 1; i < path.corners.Length; i++)
+      {
+        distance += Vector3.Distance(path.corners[i - 1], path.corners[i]);
+      }
+      return distance;
+    }
+
+    // If there is no valid path (e.g. player is on a roof), return infinity
+    return Mathf.Infinity;
+  }
+
+  private float GetDistanceToClosetObstacle(Vector3 targetPosition)
+  {
+    NavMeshPath path = new NavMeshPath();
+    if (NavMesh.CalculatePath(transform.position, targetPosition, NavMesh.AllAreas, path))
+    {
+      float distance = 0f;
+
+      // Measure the length of every line segment in the path
+      for (int i = 1; i < path.corners.Length; i++)
+      {
+        distance += Vector3.Distance(path.corners[i - 1], path.corners[i]);
+      }
+      return distance;
+    }
+    return Mathf.Infinity;
   }
 }
