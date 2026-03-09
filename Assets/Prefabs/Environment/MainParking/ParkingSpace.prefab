@@ -151,7 +151,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8915876812252468966, guid: 847eb1c97ec473b4699b8d5ebc0313dd, type: 3}
       propertyPath: m_VersionIndex
-      value: 1305
+      value: 1314
       objectReference: {fileID: 0}
     - target: {fileID: 8915876812252468966, guid: 847eb1c97ec473b4699b8d5ebc0313dd, type: 3}
       propertyPath: m_SelectedEdges.Array.size
