@@ -5,7 +5,7 @@ public class SolarLightController : MonoBehaviour
 {
 
   public bool isOn = true;
-  public float[] pattern = { 1f, -1f, 1f };
+  public float[] pattern = {};
 
   private int index = 0;
   private float switchTime = 0f;
@@ -20,11 +20,15 @@ public class SolarLightController : MonoBehaviour
     {
       TurnOffLight();
     }
+    if (pattern.Length > 0) {
+      switchTime = Time.time + Mathf.Abs(pattern[index]);
+      index = (index + 1) % pattern.Length;
+    }
   }
 
   void Update()
   {
-    if (Time.time >= switchTime)
+    if (pattern.Length > 0 && Time.time >= switchTime)
     {
       if (pattern[index] > 0)
       {
@@ -34,9 +38,10 @@ public class SolarLightController : MonoBehaviour
       {
         TurnOffLight();
       }
+
+      switchTime = Time.time + Mathf.Abs(pattern[index]);
+      index = (index + 1) % pattern.Length;
     }
-    switchTime = Time.time + Mathf.Abs(pattern[index]);
-    index = (index + 1) % pattern.Length;
   }
 
   public void TurnOnLight()
