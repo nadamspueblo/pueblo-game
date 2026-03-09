@@ -36,7 +36,7 @@ public class WeaponHitbox : MonoBehaviour
     PlayImpactSound();
 
     // 2. Check if the thing we hit has health
-    HealthManager targetHealth = other.GetComponent<HealthManager>();
+    SurvivalStats targetHealth = other.GetComponent<SurvivalStats>();
 
     if (targetHealth != null)
     {
