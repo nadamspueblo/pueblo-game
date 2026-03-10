@@ -2892,6 +2892,7 @@ GameObject:
   - component: {fileID: 135756642051420426}
   - component: {fileID: 4416926081702505850}
   - component: {fileID: 6982812146354924983}
+  - component: {fileID: 6982812146354924984}
   m_Layer: 8
   m_Name: PlayerArmature
   m_TagString: Player
@@ -3824,6 +3825,23 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   onPlayerDeath:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &6982812146354924984
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4416926081702505846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b16452e5f3962245a694d46d7d17852, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
+  maxSlots: 5
+  items: []
+  onInventoryChanged:
     m_PersistentCalls:
       m_Calls: []
 --- !u!4 &6983258932136875375
