@@ -1,32 +1,53 @@
 using UnityEngine;
+using StarterAssets; // Needed to access the ThirdPersonController
 
 public class WeaponController : MonoBehaviour
 {
-    [Header("Animation Settings")]
+    [Header("Core References")]
     public Animator playerAnimator; 
+    public ThirdPersonController tpc; // Drag the Player here
+    public SurvivalStats playerStats; // Drag the Player here
+
+    [Header("Animation Settings")]
     public string swingTrigger = "SwingAttack";
     
     [Header("Input Settings")]
-    public KeyCode attackKey = KeyCode.Mouse0;
+    public KeyCode aimKey = KeyCode.Mouse1;   // Right Click to ready weapon
+    public KeyCode attackKey = KeyCode.Mouse0; // Left Click to swing
     
-    [Header("Timing Settings")]
-    public float attackCooldown = 2.0f; // Adjust based on your animation length
+    [Header("Combat Settings")]
+    public float attackCooldown = 1.5f; 
+    public float attackStaminaCost = 25f;
     
     private bool canAttack = true;
     
     void Start()
     {
-        if (playerAnimator == null)
-        {
-            playerAnimator = GetComponentInParent<Animator>();
-        }
+        if (playerAnimator == null) playerAnimator = GetComponentInParent<Animator>();
+        if (tpc == null) tpc = GetComponentInParent<ThirdPersonController>();
+        if (playerStats == null) playerStats = GetComponentInParent<SurvivalStats>();
     }
     
     void Update()
     {
-        if (Input.GetKeyDown(attackKey) && canAttack)
+        // 1. Hold Right-Click to enter Combat/Strafe Mode
+        if (Input.GetKey(aimKey))
         {
-            SwingWeapon();
+            if (tpc != null) tpc.isCombatMode = true;
+
+            // 2. While aiming, Left-Click to swing (if they have stamina!)
+            if (Input.GetKeyDown(attackKey) && canAttack)
+            {
+                if (playerStats != null && playerStats.UseStamina(attackStaminaCost))
+                {
+                    SwingWeapon();
+                }
+            }
+        }
+        else
+        {
+            // Releasing Right-Click drops them back into normal exploration movement
+            if (tpc != null) tpc.isCombatMode = false;
         }
     }
     
@@ -34,13 +55,8 @@ public class WeaponController : MonoBehaviour
     {
         if (playerAnimator != null)
         {
-            // Trigger the swing animation
             playerAnimator.SetTrigger(swingTrigger);
-            
-            // Prevent spam clicking
             canAttack = false;
-            
-            // Reset after the animation should be done
             Invoke("ResetAttack", attackCooldown);
         }
     }
