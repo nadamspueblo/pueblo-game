@@ -80,6 +80,9 @@ namespace StarterAssets
     public float sprintStaminaCost = 15f; // Drains per second
     public float jumpStaminaCost = 20f;   // One-time chunk
 
+    [Header("Combat Settings")]
+    public bool isCombatMode = false;
+
     // cinemachine
     private float _cinemachineTargetYaw;
     private float _cinemachineTargetPitch;
@@ -274,12 +277,33 @@ namespace StarterAssets
         float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity,
             RotationSmoothTime);
 
+        // COMBAT INJECTION: Force rotation to match the camera's forward direction!
+        if (isCombatMode)
+        {
+          _targetRotation = _mainCamera.transform.eulerAngles.y;
+          rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
+        }
+
         // rotate to face input direction relative to camera position
+        transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+      }
+      // COMBAT INJECTION: Even if standing still, keep facing the camera in combat mode
+      else if (isCombatMode)
+      {
+        _targetRotation = _mainCamera.transform.eulerAngles.y;
+        float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
         transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
       }
 
 
       Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+
+      // COMBAT INJECTION: Override the forward-only movement to allow true strafing
+      if (isCombatMode)
+      {
+        // Multiply the character's local Right/Left and Forward/Back axes by the raw WASD input
+        targetDirection = (transform.right * _input.move.x + transform.forward * _input.move.y).normalized;
+      }
 
       // move the player
       _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
@@ -290,6 +314,18 @@ namespace StarterAssets
       {
         _animator.SetFloat(_animIDSpeed, _animationBlend);
         _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
+
+        // COMBAT INJECTION: Send raw input to the strafe tree, and toggle the state
+        if (isCombatMode)
+        {
+          _animator.SetBool("IsCombat", true);
+          _animator.SetFloat("MoveX", _input.move.x, 0.1f, Time.deltaTime);
+          _animator.SetFloat("MoveZ", _input.move.y, 0.1f, Time.deltaTime);
+        }
+        else
+        {
+          _animator.SetBool("IsCombat", false);
+        }
       }
     }
 
