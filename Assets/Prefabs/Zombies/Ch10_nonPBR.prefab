@@ -377,6 +377,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HealthManager
   maxHealth: 100
   currentHealth: 0
+  anim: {fileID: 0}
+  audioSource: {fileID: 8845339487695504638}
+  takeDamageSound: {fileID: 8300000, guid: 5b29b0de6b62747e68ebf332c8811f35, type: 3}
+  deathSound: {fileID: 8300000, guid: ecff13b727eaf4888a9f6a3221bdb662, type: 3}
 --- !u!114 &113395432980876676
 MonoBehaviour:
   m_ObjectHideFlags: 0
