@@ -83,6 +83,15 @@ namespace StarterAssets
     [Header("Combat Settings")]
     public bool isCombatMode = false;
 
+    [Header("Animation Drift Corrections")]
+    [Tooltip("Adjust these to fix diagonal root motion from Mixamo animations")]
+    public float forwardDrift = 0f;
+    public float backwardDrift = 0f;
+    public float leftStrafeDrift = 0f;
+    public float rightStrafeDrift = 0f;
+    // Tracks the absolute mathematical direction the player WANTS to go
+    private Vector3 _currentMovementDir;
+
     // cinemachine
     private float _cinemachineTargetYaw;
     private float _cinemachineTargetPitch;
@@ -270,44 +279,42 @@ namespace StarterAssets
 
       // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
       // if there is a move input rotate player when the player is moving
-      if (_input.move != Vector2.zero)
+      // COMBAT INJECTION: Cleanly separate the logic so SmoothDamp is only called once!
+      if (isCombatMode)
       {
-        _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
-                          _mainCamera.transform.eulerAngles.y;
-        float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity,
-            RotationSmoothTime);
-
-        // COMBAT INJECTION: Force rotation to match the camera's forward direction!
-        if (isCombatMode)
-        {
+          // COMBAT MODE: Always lock rotation strictly to the camera
           _targetRotation = _mainCamera.transform.eulerAngles.y;
-          rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
-        }
-
-        // rotate to face input direction relative to camera position
-        transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+          float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
+          transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
       }
-      // COMBAT INJECTION: Even if standing still, keep facing the camera in combat mode
-      else if (isCombatMode)
+      else if (_input.move != Vector2.zero)
       {
-        _targetRotation = _mainCamera.transform.eulerAngles.y;
-        float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
-        transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+          // NORMAL MODE: Free-look rotation based on input direction
+          _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
+          float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
+          transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
       }
 
 
-      Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+      // Calculate normal Starter Assets forward movement
+      _currentMovementDir = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
 
       // COMBAT INJECTION: Override the forward-only movement to allow true strafing
       if (isCombatMode)
       {
-        // Multiply the character's local Right/Left and Forward/Back axes by the raw WASD input
-        targetDirection = (transform.right * _input.move.x + transform.forward * _input.move.y).normalized;
+        _currentMovementDir = (transform.right * _input.move.x + transform.forward * _input.move.y).normalized;
+      }
+
+      // SAFETY CHECK: If the player isn't pressing any keys, zero out the direction.
+      // This prevents "Idle Wobble" in animations from slowly sliding the character!
+      if (_input.move == Vector2.zero)
+      {
+        _currentMovementDir = Vector3.zero;
       }
 
       // move the player
-      _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
-                       new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+      /*_controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
+                       new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);*/
 
       // update animator if using character
       if (_hasAnimator)
@@ -319,8 +326,18 @@ namespace StarterAssets
         if (isCombatMode)
         {
           _animator.SetBool("IsCombat", true);
-          _animator.SetFloat("MoveX", _input.move.x, 0.1f, Time.deltaTime);
-          _animator.SetFloat("MoveZ", _input.move.y, 0.1f, Time.deltaTime);
+
+          // Fetch the current blend tree values
+          float currentX = _animator.GetFloat("MoveX");
+          float currentZ = _animator.GetFloat("MoveZ");
+
+          // MoveTowards is linear. It hits exactly 0, killing "Blend Tree Ghosting"!
+          // The "5f" is the transition speed. Higher = snappier, Lower = smoother.
+          currentX = Mathf.MoveTowards(currentX, _input.move.x, Time.deltaTime * 5f);
+          currentZ = Mathf.MoveTowards(currentZ, _input.move.y, Time.deltaTime * 5f);
+
+          _animator.SetFloat("MoveX", currentX);
+          _animator.SetFloat("MoveZ", currentZ);
         }
         else
         {
@@ -447,6 +464,45 @@ namespace StarterAssets
       {
         AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
       }
+    }
+
+    void OnAnimatorMove()
+    {
+        if (_hasAnimator)
+        {
+            // 1. Grab the raw root motion step from the animation
+            Vector3 step = _animator.deltaPosition;
+
+            // 2. THE FIX: Mathematically untwist the step based on the player's input
+            if (isCombatMode && _input.move != Vector2.zero)
+            {
+                float activeCorrection = 0f;
+
+                // Determine primary direction of movement
+                if (Mathf.Abs(_input.move.y) > Mathf.Abs(_input.move.x))
+                {
+                    // Moving mostly forward/backward
+                    activeCorrection = _input.move.y > 0 ? forwardDrift : backwardDrift;
+                }
+                else
+                {
+                    // Moving mostly left/right
+                    activeCorrection = _input.move.x > 0 ? rightStrafeDrift : leftStrafeDrift;
+                }
+
+                // Spin the root motion vector to cancel out the red arrow's twist!
+                if (activeCorrection != 0f)
+                {
+                    step = Quaternion.Euler(0, activeCorrection, 0) * step;
+                }
+            }
+
+            // 3. Inject gravity and jump velocity
+            step.y = _verticalVelocity * Time.deltaTime;
+            
+            // 4. Move the controller
+            _controller.Move(step);
+        }
     }
   }
 }
