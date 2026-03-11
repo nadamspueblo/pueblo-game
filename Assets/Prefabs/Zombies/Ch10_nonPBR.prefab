@@ -318,6 +318,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8703057113205185833}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2195573103364794929}
   m_SourcePrefab: {fileID: 100100000, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
 --- !u!4 &8348158472730506259 stripped
 Transform:
@@ -377,10 +380,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HealthManager
   maxHealth: 100
   currentHealth: 0
-  anim: {fileID: 0}
-  audioSource: {fileID: 8845339487695504638}
-  takeDamageSound: {fileID: 8300000, guid: 5b29b0de6b62747e68ebf332c8811f35, type: 3}
-  deathSound: {fileID: 8300000, guid: ecff13b727eaf4888a9f6a3221bdb662, type: 3}
+  onTakeDamage:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2195573103364794929}
+        m_TargetAssemblyTypeName: DamageFeedback, Assembly-CSharp
+        m_MethodName: PlayHitReaction
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onDeath:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2195573103364794929}
+        m_TargetAssemblyTypeName: DamageFeedback, Assembly-CSharp
+        m_MethodName: PlayDeathReaction
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &113395432980876676
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -447,6 +476,22 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0.85, z: 0}
+--- !u!114 &2195573103364794929
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8687810136891502249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38c25b28e1a591b439c29e95c8a30d67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DamageFeedback
+  anim: {fileID: 0}
+  audioSource: {fileID: 8845339487695504638}
+  takeDamageSound: {fileID: 8300000, guid: 5b29b0de6b62747e68ebf332c8811f35, type: 3}
+  deathSound: {fileID: 8300000, guid: ecff13b727eaf4888a9f6a3221bdb662, type: 3}
 --- !u!4 &8837971028088327523 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8145072973764649317, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}

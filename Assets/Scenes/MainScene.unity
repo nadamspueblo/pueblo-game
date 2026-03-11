@@ -570,13 +570,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponController
   playerAnimator: {fileID: 6982812146354924982}
-  tpc: {fileID: 4416926081702505853}
-  playerStats: {fileID: 6982812146354924983}
+  tpc: {fileID: 0}
   swingTrigger: SwingAttack
-  aimKey: 324
   attackKey: 323
   attackCooldown: 1.2
-  attackStaminaCost: 25
+  spineBone: {fileID: 1478014428}
+  twistAngle: -60
+  twistAxis: {x: 0, y: 1, z: 0}
 --- !u!4 &984775927 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7c996600db9c56344b5dc716d2776431, type: 3}
@@ -1021,10 +1021,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 1.8574593
-  m_Height: 3.7149193
+  m_Radius: 1.2834445
+  m_Height: 2.690398
   m_Direction: 1
-  m_Center: {x: -0.4464866, y: 2.9928472, z: 0.91098577}
+  m_Center: {x: 0.059998997, y: 2.4158704, z: -0.00000063124304}
 --- !u!54 &1293612805
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1127,6 +1127,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1368658488}
   m_CullTransparentMesh: 1
+--- !u!4 &1478014428 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -3480699329000672020, guid: 7c996600db9c56344b5dc716d2776431, type: 3}
+  m_PrefabInstance: {fileID: 1936727465}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1651516140
 GameObject:
   m_ObjectHideFlags: 0
@@ -2703,6 +2708,7 @@ GameObject:
   - component: {fileID: 6982812146354924983}
   - component: {fileID: 6982812146354924984}
   - component: {fileID: 6982812146354924985}
+  - component: {fileID: 6982812146354924986}
   m_Layer: 8
   m_Name: PlayerArmature
   m_TagString: Player
@@ -3672,6 +3678,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMeleeAttack
   weaponHitbox: {fileID: 1293612802}
+--- !u!114 &6982812146354924986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4416926081702505846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6f85a05070f3414d864499fef374a66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatState
+  tpc: {fileID: 4416926081702505853}
+  aimKey: 324
 --- !u!4 &6983258932136875375
 Transform:
   m_ObjectHideFlags: 0
