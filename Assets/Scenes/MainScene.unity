@@ -3075,6 +3075,10 @@ MonoBehaviour:
   sprintStaminaCost: 15
   jumpStaminaCost: 20
   isCombatMode: 0
+  forwardDrift: 0
+  backwardDrift: 0
+  leftStrafeDrift: 0
+  rightStrafeDrift: 0
 --- !u!1 &4523139366627940650
 GameObject:
   m_ObjectHideFlags: 0
@@ -3807,9 +3811,9 @@ MonoBehaviour:
   currentThirst: 0
   currentSleep: 0
   currentStamina: 0
-  hungerDrainRate: 0.5
-  thirstDrainRate: 1
-  sleepDrainRate: 0.2
+  hungerDrainRate: 0.05
+  thirstDrainRate: 0.1
+  sleepDrainRate: 0.02
   staminaRegenRate: 15
   staminaRegenDelay: 1
   exhaustionDelay: 3
