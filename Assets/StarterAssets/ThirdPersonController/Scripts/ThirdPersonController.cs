@@ -69,6 +69,9 @@ namespace StarterAssets
     [Tooltip("How far in degrees can you move the camera down")]
     public float BottomClamp = -30.0f;
 
+    [Tooltip("Camera movement speend")]
+    public float mouseSpeedMultiplier = 1.0f;
+
     [Tooltip("Additional degress to override the camera. Useful for fine tuning camera position when locked")]
     public float CameraAngleOverride = 0.0f;
 
@@ -235,7 +238,7 @@ namespace StarterAssets
       if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
       {
         //Don't multiply mouse input by Time.deltaTime;
-        float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
+        float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f * mouseSpeedMultiplier : Time.deltaTime;
 
         _cinemachineTargetYaw += _input.look.x * deltaTimeMultiplier;
         _cinemachineTargetPitch += _input.look.y * deltaTimeMultiplier;
