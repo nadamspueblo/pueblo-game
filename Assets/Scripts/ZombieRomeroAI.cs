@@ -38,11 +38,14 @@ public class ZombieRomeroAI : MonoBehaviour
   private float growlTimer = 0f;
   private float nextGrowlTime = 5f;
 
+  private HealthManager healthManager;
+
   void Start()
   {
     agent = GetComponent<NavMeshAgent>();
     animator = GetComponentInChildren<Animator>();
     timer = wanderTimer;
+    healthManager = GetComponent<HealthManager>();
 
     if (targetToChase == null)
     {
@@ -52,6 +55,7 @@ public class ZombieRomeroAI : MonoBehaviour
 
   void Update()
   {
+    if (healthManager.IsDead()) return;
     // 1. Calculate the distance to the target (Player)
     float distanceToTarget = Mathf.Infinity;
     if (targetToChase != null)
