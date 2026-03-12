@@ -10,13 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9b020e56fcdede4469dfd894994a3d0e, type: 3}
-  m_Name: WaterBottle
+  m_Name: CannedFood
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemName: Water Bottle
-  description: Fills players thirst
+  itemName: canned beans
+  description: 'Fills players hunger
+
+'
   icon: {fileID: 0}
   isConsumable: 1
   isCraftingMaterial: 0
-  statToRestore: thirst
-  restoreAmount: 30
-  itemPrefab: {fileID: 1216505430168376, guid: 8e862d7ff65bc4368abdf49f5f164e01, type: 3}
+  statToRestore: hunger
+  restoreAmount: 20
+  itemPrefab: {fileID: 1896720402374228, guid: 8a286898ef48a4517a45e7e8f70c593b, type: 3}
