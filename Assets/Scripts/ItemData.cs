@@ -19,4 +19,7 @@ public class ItemData : ScriptableObject
     [Tooltip("health, hunger, thirst, sleep")]
     public string statToRestore; 
     public float restoreAmount;
+
+    [Header("3D Representation")]
+    public GameObject itemPrefab;
 }
