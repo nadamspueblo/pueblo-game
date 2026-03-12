@@ -27,6 +27,11 @@ public class CopZombieAI : MonoBehaviour
     agent = GetComponent<NavMeshAgent>();
     animator = GetComponentInChildren<Animator>();
     timer = wanderTimer;
+
+    if (targetToChase == null)
+    {
+      targetToChase = GameObject.FindWithTag("Player").transform;
+    }
   }
 
   void Update()
