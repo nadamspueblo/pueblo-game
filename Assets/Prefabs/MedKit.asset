@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b020e56fcdede4469dfd894994a3d0e, type: 3}
+  m_Name: MedKit
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemName: Medkit
+  description: 'Heals the player on use '
+  icon: {fileID: 0}
+  isConsumable: 1
+  isCraftingMaterial: 0
+  statToRestore: health
+  restoreAmount: 45
+  itemPrefab: {fileID: 1987713744733760, guid: d9d11478aef494cb5907cf8c3a55464b, type: 3}

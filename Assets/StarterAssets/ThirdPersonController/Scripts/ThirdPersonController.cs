@@ -69,6 +69,9 @@ namespace StarterAssets
     [Tooltip("How far in degrees can you move the camera down")]
     public float BottomClamp = -30.0f;
 
+    [Tooltip("Camera movement speend")]
+    public float mouseSpeedMultiplier = 1.0f;
+
     [Tooltip("Additional degress to override the camera. Useful for fine tuning camera position when locked")]
     public float CameraAngleOverride = 0.0f;
 
@@ -139,6 +142,28 @@ namespace StarterAssets
       }
     }
 
+
+    public void ResetAnimationsToIdle()
+    {
+      // 1. Zero out the movement math
+      _speed = 0f;
+      _animationBlend = 0f;
+
+      // 2. Clear the physical inputs so the player doesn't lurch forward when unpaused
+      if (_input != null)
+      {
+        _input.move = Vector2.zero;
+      }
+
+      // 3. Force the Animator to the Idle state immediately
+      if (_hasAnimator)
+      {
+        _animator.SetFloat(_animIDSpeed, 0f);
+        _animator.SetFloat(_animIDMotionSpeed, 0f);
+        _animator.SetFloat("MoveX", 0f);
+        _animator.SetFloat("MoveZ", 0f);
+      }
+    }
 
     private void Awake()
     {
@@ -213,7 +238,7 @@ namespace StarterAssets
       if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
       {
         //Don't multiply mouse input by Time.deltaTime;
-        float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
+        float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f * mouseSpeedMultiplier : Time.deltaTime;
 
         _cinemachineTargetYaw += _input.look.x * deltaTimeMultiplier;
         _cinemachineTargetPitch += _input.look.y * deltaTimeMultiplier;
@@ -282,17 +307,17 @@ namespace StarterAssets
       // COMBAT INJECTION: Cleanly separate the logic so SmoothDamp is only called once!
       if (isCombatMode)
       {
-          // COMBAT MODE: Always lock rotation strictly to the camera
-          _targetRotation = _mainCamera.transform.eulerAngles.y;
-          float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
-          transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+        // COMBAT MODE: Always lock rotation strictly to the camera
+        _targetRotation = _mainCamera.transform.eulerAngles.y;
+        float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
+        transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
       }
       else if (_input.move != Vector2.zero)
       {
-          // NORMAL MODE: Free-look rotation based on input direction
-          _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
-          float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
-          transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+        // NORMAL MODE: Free-look rotation based on input direction
+        _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
+        float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
+        transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
       }
 
 
@@ -468,41 +493,41 @@ namespace StarterAssets
 
     void OnAnimatorMove()
     {
-        if (_hasAnimator)
+      if (_hasAnimator)
+      {
+        // 1. Grab the raw root motion step from the animation
+        Vector3 step = _animator.deltaPosition;
+
+        // 2. THE FIX: Mathematically untwist the step based on the player's input
+        if (isCombatMode && _input.move != Vector2.zero)
         {
-            // 1. Grab the raw root motion step from the animation
-            Vector3 step = _animator.deltaPosition;
+          float activeCorrection = 0f;
 
-            // 2. THE FIX: Mathematically untwist the step based on the player's input
-            if (isCombatMode && _input.move != Vector2.zero)
-            {
-                float activeCorrection = 0f;
+          // Determine primary direction of movement
+          if (Mathf.Abs(_input.move.y) > Mathf.Abs(_input.move.x))
+          {
+            // Moving mostly forward/backward
+            activeCorrection = _input.move.y > 0 ? forwardDrift : backwardDrift;
+          }
+          else
+          {
+            // Moving mostly left/right
+            activeCorrection = _input.move.x > 0 ? rightStrafeDrift : leftStrafeDrift;
+          }
 
-                // Determine primary direction of movement
-                if (Mathf.Abs(_input.move.y) > Mathf.Abs(_input.move.x))
-                {
-                    // Moving mostly forward/backward
-                    activeCorrection = _input.move.y > 0 ? forwardDrift : backwardDrift;
-                }
-                else
-                {
-                    // Moving mostly left/right
-                    activeCorrection = _input.move.x > 0 ? rightStrafeDrift : leftStrafeDrift;
-                }
-
-                // Spin the root motion vector to cancel out the red arrow's twist!
-                if (activeCorrection != 0f)
-                {
-                    step = Quaternion.Euler(0, activeCorrection, 0) * step;
-                }
-            }
-
-            // 3. Inject gravity and jump velocity
-            step.y = _verticalVelocity * Time.deltaTime;
-            
-            // 4. Move the controller
-            _controller.Move(step);
+          // Spin the root motion vector to cancel out the red arrow's twist!
+          if (activeCorrection != 0f)
+          {
+            step = Quaternion.Euler(0, activeCorrection, 0) * step;
+          }
         }
+
+        // 3. Inject gravity and jump velocity
+        step.y = _verticalVelocity * Time.deltaTime;
+
+        // 4. Move the controller
+        _controller.Move(step);
+      }
     }
   }
 }

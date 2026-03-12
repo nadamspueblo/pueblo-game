@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events; // Required for events!
 
 public class HealthManager : MonoBehaviour
 {
@@ -6,36 +7,38 @@ public class HealthManager : MonoBehaviour
     public float maxHealth = 100f;
     public float currentHealth;
 
+    [Header("Events")]
+    public UnityEvent onTakeDamage;
+    public UnityEvent onDeath;
+
+    private bool isDead = false;
+
     void Start()
     {
-        // Start everyone at full health
         currentHealth = maxHealth;
     }
 
-    // This is public so the weapon can call it
     public void TakeDamage(float amount)
     {
+        if (isDead) return; // Prevent taking damage after death
+
         currentHealth -= amount;
         Debug.Log(gameObject.name + " took damage! Health is now: " + currentHealth);
 
         if (currentHealth <= 0)
         {
-            Die();
+            isDead = true;
+            Debug.Log(gameObject.name + " has died!");
+            onDeath?.Invoke(); // Shout to the game that this object died!
+        }
+        else 
+        {
+            onTakeDamage?.Invoke(); // Shout that we got hit!
         }
     }
 
-    private void Die()
+    public bool IsDead() 
     {
-        Debug.Log(gameObject.name + " has died!");
-        
-        // If it's the player, we'll eventually trigger a Game Over screen
-        if (gameObject.CompareTag("Player"))
-        {
-            Debug.Log("GAME OVER!");
-        }
-        else // If it's a zombie, destroy it so it disappears from the scene
-        {
-            Destroy(gameObject);
-        }
+        return isDead;
     }
 }
