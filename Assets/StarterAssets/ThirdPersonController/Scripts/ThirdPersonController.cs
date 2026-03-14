@@ -15,7 +15,7 @@ namespace StarterAssets
   public class ThirdPersonController : MonoBehaviour
   {
     [Header("Player")]
-    [Tooltip("Move speed of the character in m/s")]
+    [Tooltip("Base speed of the character in m/s")]
     public float MoveSpeed = 2.0f;
 
     [Tooltip("Sprint speed of the character in m/s")]
@@ -106,6 +106,9 @@ namespace StarterAssets
     private float _rotationVelocity;
     private float _verticalVelocity;
     private float _terminalVelocity = 53.0f;
+    
+    // Stores movement velocity from animation root motion for use in C# jump kinematics
+    private Vector3 _lockedAirVelocity;
 
     // timeout deltatime
     private float _jumpTimeoutDelta;
@@ -493,41 +496,48 @@ namespace StarterAssets
 
     void OnAnimatorMove()
     {
-      if (_hasAnimator)
-      {
-        // 1. Grab the raw root motion step from the animation
-        Vector3 step = _animator.deltaPosition;
-
-        // 2. THE FIX: Mathematically untwist the step based on the player's input
-        if (isCombatMode && _input.move != Vector2.zero)
+        if (_hasAnimator)
         {
-          float activeCorrection = 0f;
+            Vector3 step;
 
-          // Determine primary direction of movement
-          if (Mathf.Abs(_input.move.y) > Mathf.Abs(_input.move.x))
-          {
-            // Moving mostly forward/backward
-            activeCorrection = _input.move.y > 0 ? forwardDrift : backwardDrift;
-          }
-          else
-          {
-            // Moving mostly left/right
-            activeCorrection = _input.move.x > 0 ? rightStrafeDrift : leftStrafeDrift;
-          }
+            if (Grounded)
+            {
+                // 1. GROUNDED: Let the animations drive the car
+                step = _animator.deltaPosition;
+                
+                // (Your existing drift correction math goes here!)
 
-          // Spin the root motion vector to cancel out the red arrow's twist!
-          if (activeCorrection != 0f)
-          {
-            step = Quaternion.Euler(0, activeCorrection, 0) * step;
-          }
+                // 2. THE SNAPSHOT: Constantly record our true, physical forward momentum.
+                if (Time.deltaTime > 0.001f) 
+                {
+                    _lockedAirVelocity = step / Time.deltaTime;
+                    _lockedAirVelocity.y = 0; // We only want horizontal momentum!
+                    _lockedAirVelocity *= 0.4f;
+                }
+            }
+            else
+            {
+                // 3. AIRBORNE: Coast using the locked snapshot velocity!
+                // We also add a tiny bit of steering so the player can slightly adjust their landing
+                Vector3 airSteering = _currentMovementDir * 2.0f; 
+                
+                step = (_lockedAirVelocity + airSteering) * Time.deltaTime;
+            }
+
+            // 4. Always apply gravity
+            step.y = _verticalVelocity * Time.deltaTime;
+            
+            // 5. The Firewall
+            if (float.IsNaN(step.x) || float.IsInfinity(step.x) || 
+                float.IsNaN(step.y) || float.IsInfinity(step.y) || 
+                float.IsNaN(step.z) || float.IsInfinity(step.z))
+            {
+                step = Vector3.zero;
+            }
+
+            // 6. Move safely
+            _controller.Move(step);
         }
-
-        // 3. Inject gravity and jump velocity
-        step.y = _verticalVelocity * Time.deltaTime;
-
-        // 4. Move the controller
-        _controller.Move(step);
-      }
     }
   }
 }
