@@ -8,12 +8,14 @@ public class WeaponHitbox : MonoBehaviour
   public AudioClip impactSound;
   public float damageAmount = 25f;
   private Collider hitboxCollider;
+  private CombatEffects combatEffects;
 
   void Start()
   {
     hitboxCollider = GetComponent<Collider>();
     // Start the game with the weapon turned OFF so we don't deal accidental damage
     hitboxCollider.enabled = false;
+    combatEffects = GetComponent<CombatEffects>();
   }
 
   // The Animation Event will call this to turn the weapon ON
@@ -41,7 +43,7 @@ public class WeaponHitbox : MonoBehaviour
 
       if (playerStats != null)
       {
-        playerStats.TakeDamage(damageAmount);
+        playerStats.TakeDamage(damageAmount, other.transform);
 
         // 3. Immediately turn off the hitbox so it doesn't hit the zombie 5 times in one frame
         DisableHitbox();
@@ -53,6 +55,11 @@ public class WeaponHitbox : MonoBehaviour
       if (targetHealth != null) {
         targetHealth.TakeDamage(damageAmount);
         DisableHitbox();
+      }
+
+      if (combatEffects != null)
+      {
+        combatEffects.HitStop();
       }
     }
   }

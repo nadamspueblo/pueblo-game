@@ -32,6 +32,7 @@ public class SurvivalStats : MonoBehaviour
   // We will use these later to tell the UI Canvas to update its bars
   public UnityEvent onStatsChanged;
   public UnityEvent onPlayerDeath;
+  public UnityEvent<float, Transform> onTakeDamage;
 
   private float nextStaminaRegenTime = 0f;
 
@@ -67,7 +68,7 @@ public class SurvivalStats : MonoBehaviour
     // 4. The Consequences! If starving or dehydrated, slowly drain health
     if (currentHunger <= 0 || currentThirst <= 0)
     {
-      TakeDamage(2f * Time.deltaTime);
+      TakeDamage(2f * Time.deltaTime, null);
     }
 
     // Fire off a message that stats have changed for UI update
@@ -92,10 +93,11 @@ public class SurvivalStats : MonoBehaviour
 
   // --- PUBLIC METHODS FOR OTHER SCRIPTS TO USE ---
 
-  public void TakeDamage(float amount)
+  public void TakeDamage(float amount, Transform attackerTransform)
   {
     currentHealth -= amount;
     currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+    onTakeDamage?.Invoke(amount, attackerTransform);
 
     if (currentHealth <= 0)
     {

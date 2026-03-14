@@ -1040,6 +1040,7 @@ GameObject:
   m_Component:
   - component: {fileID: 907215351}
   - component: {fileID: 907215352}
+  - component: {fileID: 907215353}
   m_Layer: 0
   m_Name: WeaponHolder
   m_TagString: Untagged
@@ -1076,13 +1077,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponController
   playerAnimator: {fileID: 6982812146354924982}
-  tpc: {fileID: 0}
-  swingTrigger: SwingAttack
-  attackKey: 323
-  attackCooldown: 1.2
+  tpc: {fileID: 4416926081702505853}
+  input: {fileID: 135756642051420426}
+  attackTrigger: Attack
+  attackTypeInt: AttackType
+  defaultAttackCooldown: 1
   spineBone: {fileID: 1478014428}
-  twistAngle: -60
   twistAxis: {x: 0, y: 1, z: 0}
+  lightAttackTwist: -60
+  heavyAttackTwist: -60
+  specialAttackTwist: 0
+  isBlocking: 0
+--- !u!114 &907215353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 907215350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c53dfb715e6904445a1b5d06072b0a11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatEffects
 --- !u!1 &940208711
 GameObject:
   m_ObjectHideFlags: 0
@@ -2657,6 +2674,11 @@ MonoBehaviour:
   jump: 0
   sprint: 0
   interact: 0
+  aim: 0
+  block: 0
+  lightAttack: 0
+  heavyAttack: 0
+  specialAttack: 0
   analogMovement: 0
   cursorLocked: 1
   cursorInputForLook: 1
@@ -3732,6 +3754,7 @@ GameObject:
   - component: {fileID: 6982812146354924984}
   - component: {fileID: 6982812146354924985}
   - component: {fileID: 6982812146354924986}
+  - component: {fileID: 6982812146354924987}
   m_Layer: 8
   m_Name: PlayerArmature
   m_TagString: Player
@@ -4672,6 +4695,9 @@ MonoBehaviour:
   onPlayerDeath:
     m_PersistentCalls:
       m_Calls: []
+  onTakeDamage:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &6982812146354924984
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4715,7 +4741,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatState
   tpc: {fileID: 4416926081702505853}
-  aimKey: 324
+  input: {fileID: 135756642051420426}
+--- !u!114 &6982812146354924987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4416926081702505846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddc15a07e09fdd74686641fa21c02645, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatReactions
+  playerAnimator: {fileID: 6982812146354924982}
+  weaponController: {fileID: 907215352}
+  stats: {fileID: 6982812146354924983}
 --- !u!4 &6983258932136875375
 Transform:
   m_ObjectHideFlags: 0
