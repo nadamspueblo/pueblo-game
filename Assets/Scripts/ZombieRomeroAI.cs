@@ -164,6 +164,7 @@ public class ZombieRomeroAI : MonoBehaviour
     if (animator != null)
     {
       animator.SetTrigger("Attack");
+      animator.SetInteger("AttackIndex", Random.Range(0, 2));
     }
     lastAttackTime = Time.time;
   }

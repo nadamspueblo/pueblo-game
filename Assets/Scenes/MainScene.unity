@@ -1080,7 +1080,8 @@ MonoBehaviour:
   input: {fileID: 135756642051420426}
   attackTrigger: Attack
   attackTypeInt: AttackType
-  defaultAttackCooldown: 1
+  bufferWindow: 1
+  defaultAttackCooldown: 0.5
   spineBone: {fileID: 1478014428}
   twistAxis: {x: 0, y: 1, z: 0}
   lightAttackTwist: -60
