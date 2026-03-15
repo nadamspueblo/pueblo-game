@@ -1040,7 +1040,6 @@ GameObject:
   m_Component:
   - component: {fileID: 907215351}
   - component: {fileID: 907215352}
-  - component: {fileID: 907215353}
   m_Layer: 0
   m_Name: WeaponHolder
   m_TagString: Untagged
@@ -1088,18 +1087,6 @@ MonoBehaviour:
   heavyAttackTwist: -60
   specialAttackTwist: 0
   isBlocking: 0
---- !u!114 &907215353
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 907215350}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c53dfb715e6904445a1b5d06072b0a11, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CombatEffects
 --- !u!1 &940208711
 GameObject:
   m_ObjectHideFlags: 0
@@ -1148,9 +1135,29 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 907215351}
     m_Modifications:
+    - target: {fileID: 100000, guid: 1fb1789d2762cb048a60b81e759db9fa, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 100002, guid: 1fb1789d2762cb048a60b81e759db9fa, type: 3}
       propertyPath: m_Name
       value: Wrench
+      objectReference: {fileID: 0}
+    - target: {fileID: 100002, guid: 1fb1789d2762cb048a60b81e759db9fa, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 100004, guid: 1fb1789d2762cb048a60b81e759db9fa, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 100006, guid: 1fb1789d2762cb048a60b81e759db9fa, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 100008, guid: 1fb1789d2762cb048a60b81e759db9fa, type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 400002, guid: 1fb1789d2762cb048a60b81e759db9fa, type: 3}
       propertyPath: m_LocalScale.x
@@ -1221,6 +1228,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100002, guid: 1fb1789d2762cb048a60b81e759db9fa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1293612805}
+    - targetCorrespondingSourceObject: {fileID: 100002, guid: 1fb1789d2762cb048a60b81e759db9fa, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1293612806}
   m_SourcePrefab: {fileID: 100100000, guid: 1fb1789d2762cb048a60b81e759db9fa, type: 3}
 --- !u!1 &1081817401
 GameObject:
@@ -1818,6 +1828,18 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1293612806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1293612801}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c53dfb715e6904445a1b5d06072b0a11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatEffects
 --- !u!1 &1368658488
 GameObject:
   m_ObjectHideFlags: 0

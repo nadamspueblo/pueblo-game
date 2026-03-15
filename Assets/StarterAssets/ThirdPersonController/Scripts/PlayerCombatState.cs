@@ -3,22 +3,30 @@ using StarterAssets;
 
 public class PlayerCombatState : MonoBehaviour
 {
-    [Header("References")]
-    public ThirdPersonController tpc;
-    public StarterAssetsInputs input;
-    
-    void Start()
+  [Header("References")]
+  public ThirdPersonController tpc;
+  public StarterAssetsInputs input;
+
+  void Start()
+  {
+    if (tpc == null) tpc = GetComponent<ThirdPersonController>();
+    if (input == null) input = GetComponent<StarterAssetsInputs>();
+  }
+
+  void Update()
+  {
+    if (tpc != null && input != null)
     {
-        if (tpc == null) tpc = GetComponent<ThirdPersonController>();
-        if (input == null) input = GetComponent<StarterAssetsInputs>();
+      // If holding right-click, tell the movement script to enter combat mode!
+      tpc.isCombatMode = input.aim;
     }
 
-    void Update()
+    if (!tpc.isCombatMode)
     {
-        if (tpc != null && input != null)
-        {
-            // If holding right-click, tell the movement script to enter combat mode!
-            tpc.isCombatMode = input.aim;
-        }
+      input.lightAttack = false;
+      input.block = false;
+      input.heavyAttack = false;
+      input.specialAttack = false;
     }
+  }
 }
