@@ -16,6 +16,7 @@ public class WeaponController : MonoBehaviour
   [Tooltip("How long the player has to chain an attack")]
   public float bufferWindow = 2f;
   public float defaultAttackCooldown = 1f;
+  public CombatMagnetism combatMagnetism;
 
   [Header("Spine Correction (Per Attack)")]
   public Transform spineBone;
@@ -115,6 +116,11 @@ public class WeaponController : MonoBehaviour
       // Tell the Animator which attack to play, then pull the trigger
       playerAnimator.SetInteger(attackTypeInt, attackType);
       playerAnimator.SetTrigger(attackTrigger);
+
+      if (combatMagnetism != null)
+      {
+        combatMagnetism.TriggerMagnetism();
+      }
 
       // Set our target twist for the LateUpdate
       targetTwist = requiredTwist;

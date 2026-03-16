@@ -12439,22 +12439,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: rushSpeed
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: chaseSpeed
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: rushDistance
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: attackDistance
-      value: 1.5
-      objectReference: {fileID: 0}
     - target: {fileID: 8348158472730506259, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
       propertyPath: m_LocalPosition.x
       value: 48.86
@@ -30311,22 +30295,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: rushSpeed
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: chaseSpeed
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: rushDistance
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: attackDistance
-      value: 1.5
-      objectReference: {fileID: 0}
     - target: {fileID: 8348158472730506259, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
       propertyPath: m_LocalPosition.x
       value: 129.6
@@ -74020,22 +73988,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: rushSpeed
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: chaseSpeed
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: rushDistance
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: attackDistance
-      value: 1.5
-      objectReference: {fileID: 0}
     - target: {fileID: 6763668768178973228, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
       propertyPath: audioSource
       value: 
@@ -318615,22 +318567,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: rushSpeed
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: chaseSpeed
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: rushDistance
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 4480390447853956435, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
-      propertyPath: attackDistance
-      value: 1.5
-      objectReference: {fileID: 0}
     - target: {fileID: 4889336383987287660, guid: 4a2cf01b3f524714d8f371696b382f91, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.02
