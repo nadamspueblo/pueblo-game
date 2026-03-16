@@ -13,7 +13,7 @@ public class InventoryUI : MonoBehaviour
   public Inventory3DPreview studio;
   public GameObject player;
   public ThirdPersonController playerController;
-  public SurvivalStats  survivalStats;
+  public SurvivalStats survivalStats;
 
   [Header("Input Keys")]
   public KeyCode toggleInventoryKey = KeyCode.Tab;
@@ -55,7 +55,8 @@ public class InventoryUI : MonoBehaviour
       ShowInventory();
 
       // FREEZE THE PLAYER
-      if (playerController != null) {
+      if (playerController != null)
+      {
         playerController.enabled = false;
         playerController.ResetAnimationsToIdle();
       }
@@ -109,11 +110,25 @@ public class InventoryUI : MonoBehaviour
 
     if (Input.GetKeyDown(useKey))
     {
-      Debug.Log("Used item: " + currentItem.itemName);
-      // Restore the appropriate stat
-      survivalStats.RestoreStat(currentItem.statToRestore, currentItem.restoreAmount);
+      switch (currentItem.type)
+      {
+        case ItemType.Consumable:
+          Debug.Log("Used item: " + currentItem.itemName);
+          // Restore the appropriate stat
+          survivalStats.RestoreStat(currentItem.statToRestore, currentItem.restoreAmount);
+          ConsumeCurrentItem();
+          break;
+        case ItemType.Weapon:
+          EquipWeapon(currentItem);
+          break;
+        default:
+          Debug.Log("Used item: " + currentItem.itemName);
+          // Restore the appropriate stat
+          survivalStats.RestoreStat(currentItem.statToRestore, currentItem.restoreAmount);
+          ConsumeCurrentItem();
+          break;
+      }
 
-      ConsumeCurrentItem();
     }
     else if (Input.GetKeyDown(dropKey))
     {
@@ -184,5 +199,12 @@ public class InventoryUI : MonoBehaviour
       inventoryGroup.interactable = false; // Disable interactions
       inventoryGroup.blocksRaycasts = false; // Let clicks pass through to the game
     }
+  }
+
+  void EquipWeapon(ItemData weaponItem) 
+  {
+    // Assign the references
+    PlayerCombatState combatState = player.GetComponent<PlayerCombatState>(); 
+    combatState.EquipWeapon(weaponItem);
   }
 }

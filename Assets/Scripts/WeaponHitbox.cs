@@ -1,6 +1,5 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Collider))]
 public class WeaponHitbox : MonoBehaviour
 {
   [Header("Audio Setup")]

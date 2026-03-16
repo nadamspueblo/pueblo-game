@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerMeleeAttack : MonoBehaviour
 {
-    public WeaponHitbox weaponHitbox; // Drag the ZombieBiteHitbox here!
+    public WeaponHitbox weaponHitbox; // Drag the player's weapon hitbox here
 
     // The Animation Event will call this when the arm swings forward
     public void Event_EnableWeapon()
