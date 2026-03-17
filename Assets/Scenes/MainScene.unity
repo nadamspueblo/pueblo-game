@@ -216,6 +216,105 @@ CanvasGroup:
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
+--- !u!1 &293523440
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 293523441}
+  - component: {fileID: 293523444}
+  - component: {fileID: 293523443}
+  - component: {fileID: 293523442}
+  m_Layer: 0
+  m_Name: Fist
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &293523441
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 293523440}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.162, y: 0, z: -0.122}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 907215351}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!54 &293523442
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 293523440}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &293523443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 293523440}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5c2b85c3c1a8e8489c3b554f8b49e1c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponHitbox
+  audioSource: {fileID: 0}
+  impactSound: {fileID: 0}
+  damageAmount: 10
+--- !u!136 &293523444
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 293523440}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.16
+  m_Height: 0.3856737
+  m_Direction: 1
+  m_Center: {x: 0.000000002945517, y: 0.01805487, z: 0.000000010997063}
 --- !u!1 &295916995
 GameObject:
   m_ObjectHideFlags: 0
@@ -1055,7 +1154,8 @@ Transform:
   m_LocalPosition: {x: -0.129, y: 0.555, z: 0.265}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 293523441}
   m_Father: {fileID: 71493148}
   m_LocalEulerAnglesHint: {x: -170.514, y: -142.63, z: 119.029}
 --- !u!114 &907215352
@@ -1075,6 +1175,7 @@ MonoBehaviour:
   input: {fileID: 135756642051420426}
   attackTrigger: Attack
   attackTypeInt: AttackType
+  weaponType: 0
   bufferWindow: 1
   defaultAttackCooldown: 0.5
   combatMagnetism: {fileID: 6982812146354924988}
@@ -4560,7 +4661,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23d231f2d986f47b3a47de41ceac031b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMeleeAttack
-  weaponHitbox: {fileID: 0}
+  weaponHitbox: {fileID: 293523443}
+  rightHandHitbox: {fileID: 0}
+  leftHand: {fileID: 0}
 --- !u!114 &6982812146354924986
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4607,7 +4710,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatMagnetism
   magnetRadius: 3.5
   maxAngle: 45
-  optimalStrikeDistance: 1.1
+  optimalStrikeDistance: 1.5
   warpDuration: 0.15
   enemyLayer:
     serializedVersion: 2

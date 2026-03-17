@@ -45,6 +45,8 @@ public class PlayerCombatState : MonoBehaviour
     PlayerMeleeAttack attack = GetComponent<PlayerMeleeAttack>();
     attack.weaponHitbox = weapon.GetComponent<WeaponHitbox>();
     weaponType = weaponItem.weaponType;
+    WeaponController weaponController = GetComponentInChildren<WeaponController>();
+    weaponController.weaponType = weaponType;
     
     // Animate unequipping the weapon
     Animator anim = GetComponent<Animator>();

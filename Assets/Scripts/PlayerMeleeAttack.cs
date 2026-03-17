@@ -3,6 +3,8 @@ using UnityEngine;
 public class PlayerMeleeAttack : MonoBehaviour
 {
     public WeaponHitbox weaponHitbox; // Drag the player's weapon hitbox here
+    public WeaponHitbox rightHandHitbox;
+    public WeaponHitbox leftHand;
 
     // The Animation Event will call this when the arm swings forward
     public void Event_EnableWeapon()
@@ -15,4 +17,9 @@ public class PlayerMeleeAttack : MonoBehaviour
     {
         if (weaponHitbox != null) weaponHitbox.DisableHitbox();
     }
+
+    public void Event_EnablePunch()
+  {
+    if (rightHandHitbox != null) rightHandHitbox.EnableHitbox();
+  }
 }

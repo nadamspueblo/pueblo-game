@@ -13,6 +13,7 @@ public class WeaponController : MonoBehaviour
   [Header("Combat Settings")]
   public string attackTrigger = "Attack";
   public string attackTypeInt = "AttackType"; // 0=Light, 1=Heavy, 2=Special
+  public WeaponType weaponType = WeaponType.Unarmed;
   [Tooltip("How long the player has to chain an attack")]
   public float bufferWindow = 2f;
   public float defaultAttackCooldown = 1f;
@@ -61,7 +62,8 @@ public class WeaponController : MonoBehaviour
       {
         if (input.lightAttack)
         {
-          ExecuteAttack(0, lightAttackTwist);
+          if (weaponType == WeaponType.Melee1Hand) ExecuteAttack(0, lightAttackTwist);
+          else ExecuteAttack(0, 0f);
           input.lightAttack = false; // Consume the input so it doesn't double-fire
         }
         else if (input.heavyAttack)
