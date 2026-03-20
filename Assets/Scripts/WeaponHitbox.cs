@@ -47,10 +47,9 @@ public class WeaponHitbox : MonoBehaviour
       }
     }
     else {
-      Debug.Log("Hit enemy");
       ZombieBodyPart hitPart = other.GetComponent<ZombieBodyPart>();
       if (hitPart != null) {
-        hitPart.HitByWeapon(10f, transform, transform.root);
+        hitPart.HitByWeapon(damageAmount, transform, transform.root);
         DisableHitbox();
       }
     }

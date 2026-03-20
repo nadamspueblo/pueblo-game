@@ -17,6 +17,8 @@ public class DamageFeedback : MonoBehaviour
   public GameObject bloodSplatterPrefab;
   public Transform headBone;
   private float headTwistTimer = 0f;
+  public RagdollManager ragdollManager;
+  private ZombieAdvancedAI zombieAdvancedAI;
 
   void Start()
   {
@@ -24,6 +26,7 @@ public class DamageFeedback : MonoBehaviour
     if (audioSource == null) audioSource = GetComponent<AudioSource>();
     if (healthManager == null) healthManager = GetComponent<HealthManager>();
     if (healthManager != null) { healthManager.onDeath.AddListener(PlayDeathReaction); }
+    zombieAdvancedAI = GetComponent<ZombieAdvancedAI>();
 
     // Note: If you still have generic damage sources (like fire/poison), 
     // you can keep an event listener here that points to a generic hit reaction!
@@ -32,7 +35,7 @@ public class DamageFeedback : MonoBehaviour
   }
 
   // Your ZombieBodyPart colliders will call this directly when struck by the axe!
-  public void PlayLocationalReaction(ZombieBodyPart.PartType partHit, Vector3 hitPoint, Transform attacker, Transform hitBone)
+  public void PlayLocationalReaction(ZombieBodyPart.PartType partHit, Vector3 hitPoint, Transform attacker, Transform hitBone, float damage)
   {
     // 1. Audio
     if (audioSource != null && takeDamageSound != null)
@@ -41,15 +44,14 @@ public class DamageFeedback : MonoBehaviour
     }
 
     // 2. Spawn Blood at the exact point of impact
+    Vector3 dirToAttacker = (attacker.position - transform.position).normalized;
     if (bloodSplatterPrefab != null)
     {
-      Vector3 directionToAttacker = (attacker.position - hitPoint).normalized;
-      GameObject bloodVFX = Instantiate(bloodSplatterPrefab, hitPoint, Quaternion.LookRotation(directionToAttacker), hitBone);
+      GameObject bloodVFX = Instantiate(bloodSplatterPrefab, hitPoint, Quaternion.LookRotation(dirToAttacker), hitBone);
       Destroy(bloodVFX, 10.0f);
     }
 
     // 3. Snap Rotation
-    Vector3 dirToAttacker = (attacker.position - transform.position).normalized;
     dirToAttacker.y = 0;
 
     if (dirToAttacker != Vector3.zero)
@@ -69,13 +71,23 @@ public class DamageFeedback : MonoBehaviour
     switch (partHit)
     {
       case ZombieBodyPart.PartType.Head:
-        TriggerHeadshot();
+        
+        anim.SetTrigger("Hit");
+        anim.SetFloat("DamageAmount", damage);
+        anim.SetFloat("HitX", dirToAttacker.x);
+        if (damage >= 50)
+        {
+          if (attacker.CompareTag("Player")) TriggerHeadshot();
+          zombieAdvancedAI.Event_ChangeState("Unconscious");
+        }
         break;
       case ZombieBodyPart.PartType.Torso:
         anim.SetTrigger("Hit"); // Your default stumble
+        anim.SetFloat("DamageAmount", damage);
+        anim.SetFloat("HitX", dirToAttacker.x);
         break;
       case ZombieBodyPart.PartType.Legs:
-        anim.SetTrigger("HitLegs"); // Make sure this trigger exists in the Animator!
+        anim.SetTrigger("HitLegs"); 
         break;
     }
   }
@@ -86,10 +98,7 @@ public class DamageFeedback : MonoBehaviour
     StartCoroutine(HitPauseRoutine(0.5f));
 
     // Twist the head bone for half a second
-    headTwistTimer = 0.5f;
-
-    // Still trigger the torso stumble so the body reacts!
-    anim.SetTrigger("Hit");
+    //headTwistTimer = 0.5f;
   }
 
   void LateUpdate()
@@ -121,7 +130,6 @@ public class DamageFeedback : MonoBehaviour
       // Force the Animator to forget any pending flinch commands!
       anim.ResetTrigger("Hit");
       anim.ResetTrigger("HitLegs");
-      anim.SetTrigger("Death");
     }
 
     if (audioSource != null && deathSound != null)
@@ -129,17 +137,19 @@ public class DamageFeedback : MonoBehaviour
       audioSource.PlayOneShot(deathSound);
     }
 
+    zombieAdvancedAI.Event_ChangeState("Dead");
+
     // Disable AI completely
     if (agent != null && agent.isOnNavMesh)
     {
       agent.isStopped = true;
+      agent.enabled = false;
     }
 
-    // NEW: Disable every collider on the zombie so the axe passes through the corpse
-    Collider[] allColliders = GetComponentsInChildren<Collider>();
-    foreach (Collider col in allColliders)
+    // Enable ragdoll
+    if (ragdollManager != null)
     {
-      col.enabled = false;
+      ragdollManager.EnableRagdoll();
     }
   }
 

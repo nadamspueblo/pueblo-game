@@ -10,7 +10,7 @@ namespace StarterAssets
 {
   [RequireComponent(typeof(CharacterController))]
 #if ENABLE_INPUT_SYSTEM
-    [RequireComponent(typeof(PlayerInput))]
+  [RequireComponent(typeof(PlayerInput))]
 #endif
   public class ThirdPersonController : MonoBehaviour
   {
@@ -31,6 +31,7 @@ namespace StarterAssets
     public AudioClip LandingAudioClip;
     public AudioClip[] FootstepAudioClips;
     [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
+    public NoiseMaker noiseMaker;
 
     [Space(10)]
     [Tooltip("The height the player can jump")]
@@ -85,6 +86,8 @@ namespace StarterAssets
 
     [Header("Combat Settings")]
     public bool isCombatMode = false;
+    public bool isGrappled = false;
+    private ZombieAdvancedAI grabbingZombie;
 
     [Header("Animation Drift Corrections")]
     [Tooltip("Adjust these to fix diagonal root motion from Mixamo animations")]
@@ -106,7 +109,7 @@ namespace StarterAssets
     private float _rotationVelocity;
     private float _verticalVelocity;
     private float _terminalVelocity = 53.0f;
-    
+
     // Stores movement velocity from animation root motion for use in C# jump kinematics
     private Vector3 _lockedAirVelocity;
 
@@ -122,7 +125,7 @@ namespace StarterAssets
     private int _animIDMotionSpeed;
 
 #if ENABLE_INPUT_SYSTEM
-        private PlayerInput _playerInput;
+    private PlayerInput _playerInput;
 #endif
     private Animator _animator;
     private CharacterController _controller;
@@ -138,7 +141,7 @@ namespace StarterAssets
       get
       {
 #if ENABLE_INPUT_SYSTEM
-                return _playerInput.currentControlScheme == "KeyboardMouse";
+        return _playerInput.currentControlScheme == "KeyboardMouse";
 #else
         return false;
 #endif
@@ -185,12 +188,14 @@ namespace StarterAssets
       _controller = GetComponent<CharacterController>();
       _input = GetComponent<StarterAssetsInputs>();
 #if ENABLE_INPUT_SYSTEM
-            _playerInput = GetComponent<PlayerInput>();
+      _playerInput = GetComponent<PlayerInput>();
 #else
       Debug.LogError("Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
 #endif
 
       AssignAnimationIDs();
+
+      if (noiseMaker == null) noiseMaker = GetComponent<NoiseMaker>();
 
       // reset our timeouts on start
       _jumpTimeoutDelta = JumpTimeout;
@@ -201,6 +206,7 @@ namespace StarterAssets
     {
       _hasAnimator = TryGetComponent(out _animator);
 
+      GrappleCheck();
       JumpAndGravity();
       GroundedCheck();
       Move();
@@ -308,18 +314,19 @@ namespace StarterAssets
       // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
       // if there is a move input rotate player when the player is moving
       // COMBAT INJECTION: Cleanly separate the logic so SmoothDamp is only called once!
+      float currentSmoothTime = isGrappled ? 1.5f : RotationSmoothTime;
       if (isCombatMode)
       {
         // COMBAT MODE: Always lock rotation strictly to the camera
         _targetRotation = _mainCamera.transform.eulerAngles.y;
-        float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
+        float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, currentSmoothTime);
         transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
       }
       else if (_input.move != Vector2.zero)
       {
         // NORMAL MODE: Free-look rotation based on input direction
         _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
-        float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
+        float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, currentSmoothTime);
         transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
       }
 
@@ -349,6 +356,9 @@ namespace StarterAssets
       {
         _animator.SetFloat(_animIDSpeed, _animationBlend);
         _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
+
+        if (isGrappled) _animator.speed = 0.15f;
+        else _animator.speed = 1.0f;
 
         // COMBAT INJECTION: Send raw input to the strafe tree, and toggle the state
         if (isCombatMode)
@@ -453,6 +463,29 @@ namespace StarterAssets
       }
     }
 
+    private void GrappleCheck()
+    {
+      if (isGrappled && _input.jump)
+    {
+        if (grabbingZombie != null)
+        {
+            // Tell the zombie to let go!
+            grabbingZombie.BreakGrapple();
+            
+            // Optional: Play a "shove" animation on the player here!
+            
+            // Release ourselves immediately so we regain full speed
+            SetGrappleState(false, null);
+            // Consume the input to prevent a jump
+            _input.jump = false;
+        }
+    }
+    }
+    public void SetGrappleState(bool state, ZombieAdvancedAI zombie = null)
+    {
+      isGrappled = state;
+      grabbingZombie = zombie;
+    }
     private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
     {
       if (lfAngle < -360f) lfAngle += 360f;
@@ -478,6 +511,7 @@ namespace StarterAssets
     {
       if (animationEvent.animatorClipInfo.weight > 0.5f)
       {
+        noiseMaker.MakeNoise(20f);
         if (FootstepAudioClips.Length > 0)
         {
           var index = Random.Range(0, FootstepAudioClips.Length);
@@ -496,48 +530,48 @@ namespace StarterAssets
 
     void OnAnimatorMove()
     {
-        if (_hasAnimator)
+      if (_hasAnimator)
+      {
+        Vector3 step;
+
+        if (Grounded)
         {
-            Vector3 step;
+          // 1. GROUNDED: Let the animations drive the car
+          step = _animator.deltaPosition;
 
-            if (Grounded)
-            {
-                // 1. GROUNDED: Let the animations drive the car
-                step = _animator.deltaPosition;
-                
-                // (Your existing drift correction math goes here!)
+          // (Your existing drift correction math goes here!)
 
-                // 2. THE SNAPSHOT: Constantly record our true, physical forward momentum.
-                if (Time.deltaTime > 0.001f) 
-                {
-                    _lockedAirVelocity = step / Time.deltaTime;
-                    _lockedAirVelocity.y = 0; // We only want horizontal momentum!
-                    _lockedAirVelocity *= 0.4f;
-                }
-            }
-            else
-            {
-                // 3. AIRBORNE: Coast using the locked snapshot velocity!
-                // We also add a tiny bit of steering so the player can slightly adjust their landing
-                Vector3 airSteering = _currentMovementDir * 2.0f; 
-                
-                step = (_lockedAirVelocity + airSteering) * Time.deltaTime;
-            }
-
-            // 4. Always apply gravity
-            step.y = _verticalVelocity * Time.deltaTime;
-            
-            // 5. The Firewall
-            if (float.IsNaN(step.x) || float.IsInfinity(step.x) || 
-                float.IsNaN(step.y) || float.IsInfinity(step.y) || 
-                float.IsNaN(step.z) || float.IsInfinity(step.z))
-            {
-                step = Vector3.zero;
-            }
-
-            // 6. Move safely
-            _controller.Move(step);
+          // 2. THE SNAPSHOT: Constantly record our true, physical forward momentum.
+          if (Time.deltaTime > 0.001f)
+          {
+            _lockedAirVelocity = step / Time.deltaTime;
+            _lockedAirVelocity.y = 0; // We only want horizontal momentum!
+            _lockedAirVelocity *= 0.4f;
+          }
         }
+        else
+        {
+          // 3. AIRBORNE: Coast using the locked snapshot velocity!
+          // We also add a tiny bit of steering so the player can slightly adjust their landing
+          Vector3 airSteering = _currentMovementDir * 2.0f;
+
+          step = (_lockedAirVelocity + airSteering) * Time.deltaTime;
+        }
+
+        // 4. Always apply gravity
+        step.y = _verticalVelocity * Time.deltaTime;
+
+        // 5. The Firewall
+        if (float.IsNaN(step.x) || float.IsInfinity(step.x) ||
+            float.IsNaN(step.y) || float.IsInfinity(step.y) ||
+            float.IsNaN(step.z) || float.IsInfinity(step.z))
+        {
+          step = Vector3.zero;
+        }
+
+        // 6. Move safely
+        _controller.Move(step);
+      }
     }
   }
 }

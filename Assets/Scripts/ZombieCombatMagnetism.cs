@@ -19,18 +19,17 @@ public class ZombieCombatMagnetism : MonoBehaviour
   }
 
   // The Zombie's AI script will call this right as it triggers the attack animation
-  public void LungeAtTarget(Transform target)
+  public void LungeAtTarget(Transform target, float optimalStrikeDistance = -1.0f)
   {
     if (!isWarping && target != null && gameObject.activeInHierarchy)
     {
-      StartCoroutine(WarpToTarget(target));
+      StartCoroutine(WarpToTarget(target, optimalStrikeDistance < 0 ? this.optimalStrikeDistance : optimalStrikeDistance));
     }
   }
 
-  private IEnumerator WarpToTarget(Transform target)
+  private IEnumerator WarpToTarget(Transform target, float optimalStrikeDistance)
   {
     isWarping = true;
-    Debug.Log("WarpToTarget Started");
     Vector3 startPos = transform.position;
 
     Vector3 dirToTarget = target.position - transform.position;
@@ -92,6 +91,5 @@ public class ZombieCombatMagnetism : MonoBehaviour
     if (agent != null && agent.isOnNavMesh) agent.isStopped = false;
 
     isWarping = false;
-    Debug.Log("WarpToTarget Finished Successfully");
   }
 }

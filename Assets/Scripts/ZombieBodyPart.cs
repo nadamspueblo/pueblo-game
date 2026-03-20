@@ -39,7 +39,7 @@ public class ZombieBodyPart : MonoBehaviour
         // 4. Tell DamageFeedback to play the specific reaction and spawn blood
         if (damageFeedback != null)
         {
-            damageFeedback.PlayLocationalReaction(bodyPart, exactHitPoint, attackerRoot, this.transform);
+            damageFeedback.PlayLocationalReaction(bodyPart, exactHitPoint, attackerRoot, this.transform, calculatedDamage);
         }
 
         // 5. Forward the damage to the main brain (Optional based on your game design!)
