@@ -148,6 +148,7 @@ GameObject:
   - component: {fileID: 7545023814492353698}
   - component: {fileID: 7050715019717499590}
   - component: {fileID: 57185079863072217}
+  - component: {fileID: 6988012490377226015}
   m_Layer: 0
   m_Name: Item_Wrench
   m_TagString: Untagged
@@ -187,7 +188,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -235,6 +236,27 @@ MonoBehaviour:
   itemData: {fileID: 11400000, guid: 638cab59f53871c47a11b0bacdad010f, type: 2}
   promptCanvas: {fileID: 5601005491304472652}
   promptText: {fileID: 1489218050486224908}
+--- !u!65 &6988012490377226015
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3774706613869269569}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.6455345, y: 0.0949949, z: 1}
+  m_Center: {x: -0.31424904, y: 0.015252888, z: 0}
 --- !u!1 &5601005491304472652
 GameObject:
   m_ObjectHideFlags: 0

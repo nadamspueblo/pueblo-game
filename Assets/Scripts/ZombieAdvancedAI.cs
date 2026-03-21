@@ -431,7 +431,8 @@ public class ZombieAdvancedAI : MonoBehaviour
         FaceTarget();
         PlayAudio(attackSound);
         animator.SetTrigger("Attack");
-        if (Random.value > 0.33) {
+        if (Random.value > 0.33)
+        {
           animator.SetInteger("AttackIndex", Random.Range(0, 4));
         }
         else
@@ -621,8 +622,9 @@ public class ZombieAdvancedAI : MonoBehaviour
     if (agent != null) agent.isStopped = true;
 
     // Slow player movement
-    ThirdPersonController controller = player.GetComponent<ThirdPersonController>();
-    controller.SetGrappleState(true, this);
+
+    //ThirdPersonController controller = player.GetComponent<ThirdPersonController>();
+    //controller.SetGrappleState(true, this);
 
     ToggleIgnoreCollision(true);
 
@@ -647,7 +649,10 @@ public class ZombieAdvancedAI : MonoBehaviour
     }
 
     // 3. We are in position. Play the animation!
+    isGrappleBroken = false;
     animator.SetTrigger("QuickBite");
+
+    PlayerCombatReactions combatReactions = player.GetComponent<PlayerCombatReactions>();
 
     // 4. THE STICKY PHASE (Hold on for the duration of the animation)
     float biteDuration = 1.5f; // Adjust to your specific clip length
@@ -656,13 +661,22 @@ public class ZombieAdvancedAI : MonoBehaviour
     // Instead of WaitForSeconds, we run a loop every frame while the animation plays
     while (biteTimer < biteDuration)
     {
+      if (combatReactions != null && !combatReactions.isReacting && biteTimer / biteDuration > 0.4) { combatReactions.ReactToBite(0.05f * biteDuration, this); }
+
       if (isGrappleBroken)
       {
-        // Trigger a stumble/shoved animation on the zombie
-        animator.SetTrigger("StaggerBack");
+        if (biteTimer <= 0.5f * biteDuration)
+        {
+          // Trigger a stumble/shoved animation on the zombie
+          animator.SetTrigger("StaggerBack");
 
-        // Break completely out of the while loop right now!
-        break;
+          // Break completely out of the while loop right now!
+          break;
+        }
+        else
+        {
+          isGrappleBroken = false;
+        }
       }
 
       biteTimer += Time.deltaTime;
@@ -696,13 +710,13 @@ public class ZombieAdvancedAI : MonoBehaviour
     if (agent != null) agent.isStopped = false;
 
     // Normal player movement
-    controller.SetGrappleState(false, null);
+    //controller.SetGrappleState(false, null);
 
     // 4. Change state based on the outcome
     if (isGrappleBroken)
     {
       // Give the player a second to breathe if they escaped
-      ChangeState(ZombieState.Unconscious); // Or create a specific "Stunned" state!
+      ChangeState(ZombieState.Chase); // Or create a specific "Stunned" state!
     }
     else
     {

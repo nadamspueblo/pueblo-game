@@ -28,6 +28,9 @@ public class SurvivalStats : MonoBehaviour
   public float exhaustionDelay = 3.0f;   // Wait 3 seconds if the bar hits absolute zero!
   public bool isExhausted = false;
 
+  [Header("Component References")]
+  public AttackController attackController;
+
   [Header("Events")]
   // We will use these later to tell the UI Canvas to update its bars
   public UnityEvent onStatsChanged;
@@ -44,6 +47,8 @@ public class SurvivalStats : MonoBehaviour
     currentThirst = maxThirst;
     currentSleep = maxSleep;
     currentStamina = maxStamina;
+
+    if (attackController == null) attackController = GetComponent<AttackController>();
   }
 
   void Update()
@@ -95,7 +100,7 @@ public class SurvivalStats : MonoBehaviour
 
   public void TakeDamage(float amount, Transform attackerTransform)
   {
-    currentHealth -= amount;
+    currentHealth -= attackController.isBlocking && UseStamina(attackController.blockStamina) ? 0.5f * amount : amount;
     currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
     onTakeDamage?.Invoke(amount, attackerTransform);
 

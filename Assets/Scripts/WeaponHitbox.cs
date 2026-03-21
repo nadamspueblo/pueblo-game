@@ -29,28 +29,28 @@ public class WeaponHitbox : MonoBehaviour
 
   void OnTriggerEnter(Collider other)
   {
-    
+
     // 1. Make sure we don't accidentally hit ourselves
     if (other.transform.root == transform.root) return;
+    DisableHitbox();
     PlayImpactSound();
 
     // 2. Check if the thing we hit has health
-    if (other.CompareTag("Player")) {
+    if (other.CompareTag("Player"))
+    {
       SurvivalStats playerStats = other.GetComponent<SurvivalStats>();
 
       if (playerStats != null)
       {
         playerStats.TakeDamage(damageAmount, transform.root);
-
-        // 3. Immediately turn off the hitbox so it doesn't hit the zombie 5 times in one frame
-        DisableHitbox();
       }
     }
-    else {
+    else
+    {
       ZombieBodyPart hitPart = other.GetComponent<ZombieBodyPart>();
-      if (hitPart != null) {
+      if (hitPart != null)
+      {
         hitPart.HitByWeapon(damageAmount, transform, transform.root);
-        DisableHitbox();
       }
     }
   }

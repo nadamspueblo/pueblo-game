@@ -1,47 +1,80 @@
+using System.Collections;
+using StarterAssets;
 using UnityEngine;
 
 public class PlayerCombatReactions : MonoBehaviour
 {
-    [Header("References")]
-    public Animator playerAnimator;
-    public WeaponController weaponController;
-    public SurvivalStats stats;
+  [Header("References")]
+  public ThirdPersonController thirdPersonController;
+  public Animator playerAnimator;
+  public AttackController attackController;
+  public SurvivalStats stats;
+  public bool isReacting = false;
 
-    void Start()
+  void Start()
+  {
+    // Tune the radio! When SurvivalStats broadcasts a hit, run our ReactToHit function.
+    if (stats != null)
     {
-        // Tune the radio! When SurvivalStats broadcasts a hit, run our ReactToHit function.
-        if (stats != null)
-        {
-            stats.onTakeDamage.AddListener(ReactToHit);
-        }
+      stats.onTakeDamage.AddListener(ReactToHit);
+    }
+    if (thirdPersonController == null) thirdPersonController = GetComponent<ThirdPersonController>();
+  }
+
+  public void ReactToBite(float duration, ZombieAdvancedAI zombie)
+  {
+    if (playerAnimator == null || zombie == null) return;
+    if (attackController.isBlocking && stats.currentStamina >= attackController.blockStamina)
+    {
+      playerAnimator.SetTrigger("BreakGrab");
+      zombie.BreakGrapple();
+      stats.UseStamina(attackController.blockStamina);
+    }
+    else
+    {
+      isReacting = true;
+      playerAnimator.SetBool("IsGrappled", true);
+      playerAnimator.SetTrigger("Struggle");
+      StartCoroutine(HitPauseRoutine(duration));
+    }
+  }
+
+  // This function automatically runs whenever the event fires
+  public void ReactToHit(float damage, Transform attacker)
+  {
+    if (playerAnimator == null || attacker == null) return;
+
+    // 1. Calculate the normalized direction vector to the attacker
+    Vector3 dirToAttacker = (attacker.position - transform.position).normalized;
+
+    // 2. Calculate the Dot Products for our 2D Blend Tree
+    float hitZ = Vector3.Dot(transform.forward, dirToAttacker); // Front/Back
+    float hitX = Vector3.Dot(transform.right, dirToAttacker);   // Right/Left
+
+    // 3. Are we blocking?
+    if (attackController != null && attackController.isBlocking)
+    {
+      // Check if the attack is actually coming from the front!
+      if (hitZ > 0.5f)
+      {
+        playerAnimator.SetTrigger("Hit"); // Triggers the Upper Body block flinch
+        stats.UseStamina(attackController.blockStamina);
+        return; // Stop here so we don't play the full body stagger!
+      }
     }
 
-    // This function automatically runs whenever the event fires
-    public void ReactToHit(float damage, Transform attacker)
-    {
-        if (playerAnimator == null || attacker == null) return;
+    // 4. We got hit! Send the math to the Animator for the Full Body override
+    playerAnimator.SetFloat("HitX", hitX);
+    playerAnimator.SetFloat("HitZ", hitZ);
+    playerAnimator.SetTrigger("Hit");
+  }
 
-        // 1. Calculate the normalized direction vector to the attacker
-        Vector3 dirToAttacker = (attacker.position - transform.position).normalized;
-        
-        // 2. Calculate the Dot Products for our 2D Blend Tree
-        float hitZ = Vector3.Dot(transform.forward, dirToAttacker); // Front/Back
-        float hitX = Vector3.Dot(transform.right, dirToAttacker);   // Right/Left
-
-        // 3. Are we blocking?
-        if (weaponController != null && weaponController.isBlocking)
-        {
-            // Check if the attack is actually coming from the front!
-            if (hitZ > 0.5f)
-            {
-                playerAnimator.SetTrigger("Hit"); // Triggers the Upper Body block flinch
-                return; // Stop here so we don't play the full body stagger!
-            }
-        }
-
-        // 4. We got hit! Send the math to the Animator for the Full Body override
-        playerAnimator.SetFloat("HitX", hitX);
-        playerAnimator.SetFloat("HitZ", hitZ);
-        playerAnimator.SetTrigger("Hit"); 
-    }
+  private IEnumerator HitPauseRoutine(float duration)
+  {
+    Time.timeScale = 0.1f;
+    yield return new WaitForSecondsRealtime(duration);
+    Time.timeScale = 1f;
+    isReacting = false;
+    playerAnimator.SetBool("IsGrappled", false);
+  }
 }

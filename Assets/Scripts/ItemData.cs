@@ -9,13 +9,6 @@ public enum ItemType
     Misc 
 }
 
-public enum WeaponType
-{
-  Unarmed,
-  Melee1Hand,
-  Melee2Hand
-}
-
 [CreateAssetMenu(fileName = "New Item", menuName = "Survival Game/Item Data")]
 public class ItemData : ScriptableObject
 {

@@ -80,11 +80,12 @@ namespace StarterAssets
     public bool LockCameraPosition = false;
 
     [Header("Survival Integration")]
-    public SurvivalStats playerStats;
+    public SurvivalStats survivalStats;
     public float sprintStaminaCost = 15f; // Drains per second
     public float jumpStaminaCost = 20f;   // One-time chunk
 
     [Header("Combat Settings")]
+    public AttackController attackController;
     public bool isCombatMode = false;
     public bool isGrappled = false;
     private ZombieAdvancedAI grabbingZombie;
@@ -196,6 +197,7 @@ namespace StarterAssets
       AssignAnimationIDs();
 
       if (noiseMaker == null) noiseMaker = GetComponent<NoiseMaker>();
+      if (attackController == null) attackController = GetComponent<AttackController>();
 
       // reset our timeouts on start
       _jumpTimeoutDelta = JumpTimeout;
@@ -267,10 +269,10 @@ namespace StarterAssets
       // THE INJECTION: Default to assuming we have enough energy to sprint
       bool hasEnergyToSprint = true;
 
-      if (_input.sprint && playerStats != null)
+      if (_input.sprint && survivalStats != null)
       {
         // Try to drain the stamina. If they hit 0, this returns false!
-        hasEnergyToSprint = playerStats.UseStamina(sprintStaminaCost * Time.deltaTime);
+        hasEnergyToSprint = survivalStats.UseStamina(sprintStaminaCost * Time.deltaTime);
       }
 
       // set target speed based on move speed, sprint speed and if sprint is pressed
@@ -357,9 +359,6 @@ namespace StarterAssets
         _animator.SetFloat(_animIDSpeed, _animationBlend);
         _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
 
-        if (isGrappled) _animator.speed = 0.15f;
-        else _animator.speed = 1.0f;
-
         // COMBAT INJECTION: Send raw input to the strafe tree, and toggle the state
         if (isCombatMode)
         {
@@ -408,7 +407,7 @@ namespace StarterAssets
         if (_input.jump && _jumpTimeoutDelta <= 0.0f)
         {
           // THE INJECTION: Ask the stats script if we can afford the jump
-          if (playerStats != null && playerStats.UseStamina(jumpStaminaCost))
+          if (survivalStats != null && survivalStats.UseStamina(jumpStaminaCost))
           {
             // the square root of H * -2 * G = how much velocity to reach desired height
             _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
@@ -465,7 +464,7 @@ namespace StarterAssets
 
     private void GrappleCheck()
     {
-      if (isGrappled && _input.jump)
+      if (isGrappled && _input.block && survivalStats.UseStamina(attackController.breakGrabStamina))
     {
         if (grabbingZombie != null)
         {
@@ -477,7 +476,7 @@ namespace StarterAssets
             // Release ourselves immediately so we regain full speed
             SetGrappleState(false, null);
             // Consume the input to prevent a jump
-            _input.jump = false;
+            _input.block = false;
         }
     }
     }
