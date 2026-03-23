@@ -655,13 +655,14 @@ public class ZombieAdvancedAI : MonoBehaviour
     PlayerCombatReactions combatReactions = player.GetComponent<PlayerCombatReactions>();
 
     // 4. THE STICKY PHASE (Hold on for the duration of the animation)
-    float biteDuration = 1.5f; // Adjust to your specific clip length
+    float biteDuration = 2.0f; // Adjust to your specific clip length
     float biteTimer = 0f;
 
     // Instead of WaitForSeconds, we run a loop every frame while the animation plays
     while (biteTimer < biteDuration)
     {
-      if (combatReactions != null && !combatReactions.isReacting && biteTimer / biteDuration > 0.4) { combatReactions.ReactToBite(0.05f * biteDuration, this); }
+      // Start the players reaction after the attack has already begun
+      if (combatReactions != null && !combatReactions.isReacting && biteTimer / biteDuration > 0.3) { combatReactions.ReactToBite(0.02f, this); }
 
       if (isGrappleBroken)
       {

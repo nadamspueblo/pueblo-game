@@ -652,6 +652,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7311561063055367063, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6183814857057014927}
+    - targetCorrespondingSourceObject: {fileID: 7311561063055367063, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8169471949809096232}
     - targetCorrespondingSourceObject: {fileID: -1881965479880549823, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2435376359455705233}
@@ -703,6 +706,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -3962647829050528788, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8564828273068041154}
+    - targetCorrespondingSourceObject: {fileID: -3962647829050528788, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2442601167196163705}
     - targetCorrespondingSourceObject: {fileID: -6641415448970445652, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8406619283634552821}
@@ -715,6 +721,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1020948974440007045, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9065323553264128884}
+    - targetCorrespondingSourceObject: {fileID: 1020948974440007045, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2968558998022363529}
     - targetCorrespondingSourceObject: {fileID: 8587201446677717949, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6822984879859894252}
@@ -724,6 +733,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8587201446677717949, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7136823852027521681}
+    - targetCorrespondingSourceObject: {fileID: 8587201446677717949, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6220103848035964922}
     - targetCorrespondingSourceObject: {fileID: -7269728169905626603, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1673466920029770224}
@@ -745,6 +757,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8515130166721925627, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6600457333846131909}
+    - targetCorrespondingSourceObject: {fileID: 8515130166721925627, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7434590641823988482}
     - targetCorrespondingSourceObject: {fileID: -706658983441424561, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6178034175397853415}
@@ -754,6 +769,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -706658983441424561, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8014656748899795481}
+    - targetCorrespondingSourceObject: {fileID: -706658983441424561, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1385772106970994530}
   m_SourcePrefab: {fileID: 100100000, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
 --- !u!1 &1123890953840282836 stripped
 GameObject:
@@ -854,6 +872,23 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &2442601167196163705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1123890953840282836}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 598ff2ebd2e24b84ea39d0e55cf4659d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZombieBodyPart
+  bodyPart: 1
+  localHealth: 100
+  damageMultiplier: 1
+  mainHealth: {fileID: 142503762788786909}
+  damageFeedback: {fileID: 4449111437969065416}
 --- !u!1 &1279705655900318373 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -2928631036446536291, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
@@ -1244,6 +1279,23 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &8169471949809096232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2589259831410605231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 598ff2ebd2e24b84ea39d0e55cf4659d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZombieBodyPart
+  bodyPart: 1
+  localHealth: 100
+  damageMultiplier: 1
+  mainHealth: {fileID: 142503762788786909}
+  damageFeedback: {fileID: 4449111437969065416}
 --- !u!1 &3506181447834024055 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -706658983441424561, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
@@ -1345,6 +1397,23 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &1385772106970994530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3506181447834024055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 598ff2ebd2e24b84ea39d0e55cf4659d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZombieBodyPart
+  bodyPart: 3
+  localHealth: 100
+  damageMultiplier: 1
+  mainHealth: {fileID: 142503762788786909}
+  damageFeedback: {fileID: 4449111437969065416}
 --- !u!1 &3509102152448014019 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8515130166721925627, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
@@ -1446,6 +1515,23 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &7434590641823988482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3509102152448014019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 598ff2ebd2e24b84ea39d0e55cf4659d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZombieBodyPart
+  bodyPart: 2
+  localHealth: 100
+  damageMultiplier: 1
+  mainHealth: {fileID: 142503762788786909}
+  damageFeedback: {fileID: 4449111437969065416}
 --- !u!1 &3581164541819913349 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8587201446677717949, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
@@ -1547,6 +1633,23 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &6220103848035964922
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3581164541819913349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 598ff2ebd2e24b84ea39d0e55cf4659d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZombieBodyPart
+  bodyPart: 3
+  localHealth: 100
+  damageMultiplier: 1
+  mainHealth: {fileID: 142503762788786909}
+  damageFeedback: {fileID: 4449111437969065416}
 --- !u!4 &4402793573816763352 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -324020059923274528, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}
@@ -1663,6 +1766,23 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &2968558998022363529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5238293003212120765}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 598ff2ebd2e24b84ea39d0e55cf4659d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZombieBodyPart
+  bodyPart: 3
+  localHealth: 100
+  damageMultiplier: 1
+  mainHealth: {fileID: 142503762788786909}
+  damageFeedback: {fileID: 4449111437969065416}
 --- !u!1 &5357152448200415849 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 6bc5bf2261cc10e4391785cad60ff4c6, type: 3}

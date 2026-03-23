@@ -45,16 +45,15 @@ public class PlayerCombatState : MonoBehaviour
     if (input.aim)
     {
       currentStance = CombatStance.Combat;
+      tpc.ChangeState(PlayerMovementState.CombatStrafe);
     }
     else
     {
       currentStance = CombatStance.Standard;
+      tpc.ChangeState(PlayerMovementState.FreeExplore);
     }
 
-    // 2. Tell the Movement Controller if we are in a combat-ready state
-    tpc.isCombatMode = (currentStance == CombatStance.Combat || currentStance == CombatStance.Sneak);
-
-    // 3. Prevent rogue attacks if we are just walking around in Standard stance
+    // Prevent rogue attacks if we are just walking around in Standard stance
     if (currentStance == CombatStance.Standard)
     {
       input.lightAttack = false;

@@ -81,12 +81,13 @@ public class DamageFeedback : MonoBehaviour
           zombieAdvancedAI.Event_ChangeState("Unconscious");
         }
         break;
+      case ZombieBodyPart.PartType.Arm:
       case ZombieBodyPart.PartType.Torso:
         anim.SetTrigger("Hit"); // Your default stumble
         anim.SetFloat("DamageAmount", damage);
         anim.SetFloat("HitX", dirToAttacker.x);
         break;
-      case ZombieBodyPart.PartType.Legs:
+      case ZombieBodyPart.PartType.Leg:
         anim.SetTrigger("HitLegs"); 
         break;
     }

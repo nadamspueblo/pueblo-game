@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
-#if ENABLE_INPUT_SYSTEM 
+using UnityEngine.Events;
+
+#if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
+using UnityEngine.XR;
 #endif
 
 /* Note: animations are called via the controller for both the character and capsule using animator null checks
@@ -8,6 +11,14 @@ using UnityEngine.InputSystem;
 
 namespace StarterAssets
 {
+  public enum PlayerMovementState
+  {
+    FreeExplore,
+    CombatStrafe,
+    Sneak,
+    Grappled
+  }
+
   [RequireComponent(typeof(CharacterController))]
 #if ENABLE_INPUT_SYSTEM
   [RequireComponent(typeof(PlayerInput))]
@@ -15,6 +26,9 @@ namespace StarterAssets
   public class ThirdPersonController : MonoBehaviour
   {
     [Header("Player")]
+    [Tooltip("Movement Restrictions")]
+    public PlayerMovementState currentState = PlayerMovementState.FreeExplore;
+
     [Tooltip("Base speed of the character in m/s")]
     public float MoveSpeed = 2.0f;
 
@@ -27,11 +41,6 @@ namespace StarterAssets
 
     [Tooltip("Acceleration and deceleration")]
     public float SpeedChangeRate = 10.0f;
-
-    public AudioClip LandingAudioClip;
-    public AudioClip[] FootstepAudioClips;
-    [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
-    public NoiseMaker noiseMaker;
 
     [Space(10)]
     [Tooltip("The height the player can jump")]
@@ -79,6 +88,12 @@ namespace StarterAssets
     [Tooltip("For locking the camera position on all axis")]
     public bool LockCameraPosition = false;
 
+    [Header("Audio Configuration")]
+    public AudioClip LandingAudioClip;
+    public AudioClip[] FootstepAudioClips;
+    [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
+    public NoiseMaker noiseMaker;
+
     [Header("Survival Integration")]
     public SurvivalStats survivalStats;
     public float sprintStaminaCost = 15f; // Drains per second
@@ -86,9 +101,8 @@ namespace StarterAssets
 
     [Header("Combat Settings")]
     public AttackController attackController;
-    public bool isCombatMode = false;
-    public bool isGrappled = false;
-    private ZombieAdvancedAI grabbingZombie;
+    public UnityEvent onGrappleBreak;
+    private float grappleBreakTimeLimit = 0f;
 
     [Header("Animation Drift Corrections")]
     [Tooltip("Adjust these to fix diagonal root motion from Mixamo animations")]
@@ -208,10 +222,54 @@ namespace StarterAssets
     {
       _hasAnimator = TryGetComponent(out _animator);
 
-      GrappleCheck();
-      JumpAndGravity();
-      GroundedCheck();
-      Move();
+      switch (currentState)
+      {
+        case PlayerMovementState.FreeExplore:
+          ApplyGravity();
+          Jump();
+          GroundedCheck();
+          FreeMove();
+          break;
+        case PlayerMovementState.CombatStrafe:
+          ApplyGravity();
+          GroundedCheck();
+          CombatStrafe();
+          break;
+        case PlayerMovementState.Grappled:
+          ApplyGravity();
+          GroundedCheck();
+          GrappleCheck();
+          break;
+      }
+    }
+
+    public void ChangeState(PlayerMovementState newState)
+    {
+      if (currentState == newState) return;
+
+      // Prevents changing state until grapple is broken using SetState
+      if (currentState == PlayerMovementState.Grappled) return;
+      
+      SetState(newState);
+    }
+
+    public void SetState(PlayerMovementState state)
+    {
+      currentState = state;
+      switch (state)
+      {
+        case PlayerMovementState.FreeExplore:
+          _animator.SetBool("IsCombat", false);
+          break;
+        case PlayerMovementState.CombatStrafe:
+          _animator.SetBool("IsCombat", true);
+          break;
+        case PlayerMovementState.Grappled:
+          break;
+        default:
+          _animator.SetBool("IsCombat", false);
+          break;
+      }
     }
 
     private void LateUpdate()
@@ -264,9 +322,84 @@ namespace StarterAssets
           _cinemachineTargetYaw, 0.0f);
     }
 
-    private void Move()
+    private void CombatStrafe()
     {
-      // THE INJECTION: Default to assuming we have enough energy to sprint
+      // set target speed based on move speed, sprint speed and if sprint is pressed
+      float targetSpeed = MoveSpeed;
+
+      // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
+
+      // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
+      // if there is no input, set the target speed to 0
+      if (_input.move == Vector2.zero) targetSpeed = 0.0f;
+
+      // a reference to the players current horizontal velocity
+      float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
+
+      float speedOffset = 0.1f;
+      float inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
+
+      // accelerate or decelerate to target speed
+      if (currentHorizontalSpeed < targetSpeed - speedOffset ||
+          currentHorizontalSpeed > targetSpeed + speedOffset)
+      {
+        // creates curved result rather than a linear one giving a more organic speed change
+        // note T in Lerp is clamped, so we don't need to clamp our speed
+        _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude,
+            Time.deltaTime * SpeedChangeRate);
+
+        // round speed to 3 decimal places
+        _speed = Mathf.Round(_speed * 1000f) / 1000f;
+      }
+      else
+      {
+        _speed = targetSpeed;
+      }
+
+      _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
+      if (_animationBlend < 0.01f) _animationBlend = 0f;
+
+      // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
+      float currentSmoothTime = RotationSmoothTime;
+
+      // COMBAT MODE: Always lock rotation strictly to the camera
+      _targetRotation = _mainCamera.transform.eulerAngles.y;
+      float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, currentSmoothTime);
+      transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+
+      _currentMovementDir = (transform.right * _input.move.x + transform.forward * _input.move.y).normalized;
+
+      // SAFETY CHECK: If the player isn't pressing any keys, zero out the direction.
+      // This prevents "Idle Wobble" in animations from slowly sliding the character!
+      if (_input.move == Vector2.zero)
+      {
+        _currentMovementDir = Vector3.zero;
+      }
+
+      if (_hasAnimator)
+      {
+        _animator.SetFloat(_animIDSpeed, _animationBlend);
+        _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
+
+        // Send raw input to the strafe tree, and toggle the state
+        // Fetch the current blend tree values
+        float currentX = _animator.GetFloat("MoveX");
+        float currentZ = _animator.GetFloat("MoveZ");
+
+        // MoveTowards is linear. It hits exactly 0, killing "Blend Tree Ghosting"!
+        // The "5f" is the transition speed. Higher = snappier, Lower = smoother.
+        currentX = Mathf.MoveTowards(currentX, _input.move.x, Time.deltaTime * 5f);
+        currentZ = Mathf.MoveTowards(currentZ, _input.move.y, Time.deltaTime * 5f);
+
+        _animator.SetFloat("MoveX", currentX);
+        _animator.SetFloat("MoveZ", currentZ);
+
+      }
+    }
+
+    private void FreeMove()
+    {
+      // Default to assuming we have enough energy to sprint
       bool hasEnergyToSprint = true;
 
       if (_input.sprint && survivalStats != null)
@@ -316,15 +449,8 @@ namespace StarterAssets
       // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
       // if there is a move input rotate player when the player is moving
       // COMBAT INJECTION: Cleanly separate the logic so SmoothDamp is only called once!
-      float currentSmoothTime = isGrappled ? 1.5f : RotationSmoothTime;
-      if (isCombatMode)
-      {
-        // COMBAT MODE: Always lock rotation strictly to the camera
-        _targetRotation = _mainCamera.transform.eulerAngles.y;
-        float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, currentSmoothTime);
-        transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
-      }
-      else if (_input.move != Vector2.zero)
+      float currentSmoothTime = RotationSmoothTime;
+      if (_input.move != Vector2.zero)
       {
         // NORMAL MODE: Free-look rotation based on input direction
         _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
@@ -336,12 +462,6 @@ namespace StarterAssets
       // Calculate normal Starter Assets forward movement
       _currentMovementDir = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
 
-      // COMBAT INJECTION: Override the forward-only movement to allow true strafing
-      if (isCombatMode)
-      {
-        _currentMovementDir = (transform.right * _input.move.x + transform.forward * _input.move.y).normalized;
-      }
-
       // SAFETY CHECK: If the player isn't pressing any keys, zero out the direction.
       // This prevents "Idle Wobble" in animations from slowly sliding the character!
       if (_input.move == Vector2.zero)
@@ -349,41 +469,15 @@ namespace StarterAssets
         _currentMovementDir = Vector3.zero;
       }
 
-      // move the player
-      /*_controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
-                       new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);*/
-
       // update animator if using character
       if (_hasAnimator)
       {
         _animator.SetFloat(_animIDSpeed, _animationBlend);
         _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
-
-        // COMBAT INJECTION: Send raw input to the strafe tree, and toggle the state
-        if (isCombatMode)
-        {
-          _animator.SetBool("IsCombat", true);
-
-          // Fetch the current blend tree values
-          float currentX = _animator.GetFloat("MoveX");
-          float currentZ = _animator.GetFloat("MoveZ");
-
-          // MoveTowards is linear. It hits exactly 0, killing "Blend Tree Ghosting"!
-          // The "5f" is the transition speed. Higher = snappier, Lower = smoother.
-          currentX = Mathf.MoveTowards(currentX, _input.move.x, Time.deltaTime * 5f);
-          currentZ = Mathf.MoveTowards(currentZ, _input.move.y, Time.deltaTime * 5f);
-
-          _animator.SetFloat("MoveX", currentX);
-          _animator.SetFloat("MoveZ", currentZ);
-        }
-        else
-        {
-          _animator.SetBool("IsCombat", false);
-        }
       }
     }
 
-    private void JumpAndGravity()
+    private void ApplyGravity()
     {
       if (Grounded)
       {
@@ -401,29 +495,6 @@ namespace StarterAssets
         if (_verticalVelocity < 0.0f)
         {
           _verticalVelocity = -2f;
-        }
-
-        // Jump
-        if (_input.jump && _jumpTimeoutDelta <= 0.0f)
-        {
-          // THE INJECTION: Ask the stats script if we can afford the jump
-          if (survivalStats != null && survivalStats.UseStamina(jumpStaminaCost))
-          {
-            // the square root of H * -2 * G = how much velocity to reach desired height
-            _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
-
-            // update animator if using character
-            if (_hasAnimator)
-            {
-              _animator.SetBool(_animIDJump, true);
-            }
-            _input.jump = false;
-          }
-          else
-          {
-            // If they are too tired, consume the input so they don't auto-jump later
-            _input.jump = false;
-          }
         }
 
         // jump timeout
@@ -462,29 +533,52 @@ namespace StarterAssets
       }
     }
 
+    private void Jump()
+    {
+      // Jump
+      if (_input.jump && _jumpTimeoutDelta <= 0.0f)
+      {
+        // THE INJECTION: Ask the stats script if we can afford the jump
+        if (survivalStats != null && survivalStats.UseStamina(jumpStaminaCost))
+        {
+          // the square root of H * -2 * G = how much velocity to reach desired height
+          _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+
+          // update animator if using character
+          if (_hasAnimator)
+          {
+            _animator.SetBool(_animIDJump, true);
+          }
+          _input.jump = false;
+        }
+        else
+        {
+          // If they are too tired, consume the input so they don't auto-jump later
+          _input.jump = false;
+        }
+      }
+    }
+
+    public void StartGrapple(float breakTime) 
+    {
+      SetState(PlayerMovementState.Grappled);
+      grappleBreakTimeLimit = Time.time + breakTime;
+    }
+
     private void GrappleCheck()
     {
-      if (isGrappled && _input.block && survivalStats.UseStamina(attackController.breakGrabStamina))
-    {
-        if (grabbingZombie != null)
-        {
-            // Tell the zombie to let go!
-            grabbingZombie.BreakGrapple();
-            
-            // Optional: Play a "shove" animation on the player here!
-            
-            // Release ourselves immediately so we regain full speed
-            SetGrappleState(false, null);
-            // Consume the input to prevent a jump
-            _input.block = false;
-        }
+      if (_input.block && Time.time <= grappleBreakTimeLimit && survivalStats.UseStamina(attackController.breakGrabStamina))
+      {
+        SetState(PlayerMovementState.FreeExplore);
+
+        // Invoke event
+        onGrappleBreak?.Invoke();
+
+        // Consume the input to prevent a jump
+        _input.block = false;
+      }
     }
-    }
-    public void SetGrappleState(bool state, ZombieAdvancedAI zombie = null)
-    {
-      isGrappled = state;
-      grabbingZombie = zombie;
-    }
+
     private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
     {
       if (lfAngle < -360f) lfAngle += 360f;

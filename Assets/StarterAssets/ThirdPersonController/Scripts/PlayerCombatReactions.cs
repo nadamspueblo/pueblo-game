@@ -10,6 +10,7 @@ public class PlayerCombatReactions : MonoBehaviour
   public AttackController attackController;
   public SurvivalStats stats;
   public bool isReacting = false;
+  private ZombieAdvancedAI attackingZombie;
 
   void Start()
   {
@@ -19,24 +20,33 @@ public class PlayerCombatReactions : MonoBehaviour
       stats.onTakeDamage.AddListener(ReactToHit);
     }
     if (thirdPersonController == null) thirdPersonController = GetComponent<ThirdPersonController>();
+    thirdPersonController.onGrappleBreak.AddListener(BreakGrapple);
   }
 
   public void ReactToBite(float duration, ZombieAdvancedAI zombie)
   {
     if (playerAnimator == null || zombie == null) return;
-    if (attackController.isBlocking && stats.currentStamina >= attackController.blockStamina)
+    if (attackController.isBlocking && stats.UseStamina(attackController.blockStamina))
     {
       playerAnimator.SetTrigger("BreakGrab");
       zombie.BreakGrapple();
-      stats.UseStamina(attackController.blockStamina);
     }
     else
     {
+      //thirdPersonController.SetGrappleState(true, zombie);
+      attackingZombie = zombie;
+      thirdPersonController.StartGrapple(1.0f);
       isReacting = true;
       playerAnimator.SetBool("IsGrappled", true);
       playerAnimator.SetTrigger("Struggle");
       StartCoroutine(HitPauseRoutine(duration));
     }
+  }
+
+  private void BreakGrapple()
+  {
+    attackingZombie.BreakGrapple();
+    playerAnimator.SetBool("IsGrappled", false);
   }
 
   // This function automatically runs whenever the event fires
@@ -75,6 +85,7 @@ public class PlayerCombatReactions : MonoBehaviour
     yield return new WaitForSecondsRealtime(duration);
     Time.timeScale = 1f;
     isReacting = false;
+    thirdPersonController.SetState(PlayerMovementState.FreeExplore);
     playerAnimator.SetBool("IsGrappled", false);
   }
 }

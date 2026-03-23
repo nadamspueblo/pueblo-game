@@ -48,6 +48,7 @@ public class WeaponHitbox : MonoBehaviour
     else
     {
       ZombieBodyPart hitPart = other.GetComponent<ZombieBodyPart>();
+      Debug.Log(hitPart);
       if (hitPart != null)
       {
         hitPart.HitByWeapon(damageAmount, transform, transform.root);

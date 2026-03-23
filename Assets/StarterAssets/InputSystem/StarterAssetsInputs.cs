@@ -28,44 +28,52 @@ namespace StarterAssets
     public bool cursorLocked = true;
     public bool cursorInputForLook = true;
 
+    [Header("Menu controls")]
+    public bool menuOpen = false;
+    public bool toggleMenu;
+    public bool menuLeft;
+    public bool menuRight;
+    public bool use;
+    public bool drop;
+
 #if ENABLE_INPUT_SYSTEM
-		public void OnMove(InputValue value)
-		{
-			MoveInput(value.Get<Vector2>());
-		}
+    public void OnMove(InputValue value)
+    {
+      MoveInput(value.Get<Vector2>());
+    }
 
-		public void OnLook(InputValue value)
-		{
-			if(cursorInputForLook)
-			{
-				LookInput(value.Get<Vector2>());
-			}
-		}
+    public void OnLook(InputValue value)
+    {
+      if (cursorInputForLook)
+      {
+        LookInput(value.Get<Vector2>());
+      }
+    }
 
-		public void OnJump(InputValue value)
-		{
-			if (aim) 
-        {
-            // If weapon is drawn, send the Spacebar press purely to the Block variable!
-            BlockInput(value.isPressed);
-            JumpInput(false); // Guarantee jump stays off
-        }
-        else 
-        {
-            // If exploring, send the Spacebar press to the Jump variable!
-            JumpInput(value.isPressed);
-            BlockInput(false); // Guarantee block stays off
-        }
-		}
+    public void OnJump(InputValue value)
+    {
+      if (aim)
+      {
+        // If weapon is drawn, send the Spacebar press purely to the Block variable!
+        BlockInput(value.isPressed);
+        JumpInput(false); // Guarantee jump stays off
+      }
+      else
+      {
+        // If exploring, send the Spacebar press to the Jump variable!
+        JumpInput(value.isPressed);
+        BlockInput(false); // Guarantee block stays off
+      }
+    }
 
-		public void OnSprint(InputValue value)
-		{
-			SprintInput(value.isPressed);
-		}
+    public void OnSprint(InputValue value)
+    {
+      SprintInput(value.isPressed);
+    }
 
     public void OnInteract(InputValue value)
     {
-        InteractInput(value.isPressed);
+      InteractInput(value.isPressed);
     }
 
     public void OnAim(InputValue value) { AimInput(value.isPressed); }
@@ -73,6 +81,35 @@ namespace StarterAssets
     public void OnLightAttack(InputValue value) { lightAttack = value.isPressed; }
     public void OnHeavyAttack(InputValue value) { heavyAttack = value.isPressed; }
     public void OnSpecialAttack(InputValue value) { specialAttack = value.isPressed; }
+
+    // Menu Inputs
+    public void OnToggleMenu(InputValue value)
+    {
+      toggleMenu = value.isPressed;
+      menuOpen = !menuOpen;
+    }
+    public void OnUse(InputValue value)
+    {
+      if (menuOpen)
+      {
+        use = value.isPressed;
+        interact = false;
+      }
+    }
+    public void OnDrop(InputValue value)
+    {
+      if (menuOpen) drop = value.isPressed;
+    }
+    public void OnMenuLeft(InputValue value)
+    {
+      if (menuOpen) menuLeft = value.isPressed;
+    }
+    public void OnMenuRight(InputValue value)
+    {
+      if (menuOpen) menuRight = value.isPressed;
+    }
+
+
 #endif
 
 
@@ -109,6 +146,11 @@ namespace StarterAssets
     public void InteractInput(bool newInteractState)
     {
       interact = newInteractState;
+    }
+
+    public void ToggleMenuInput(bool newToggleMenuInputState)
+    {
+      toggleMenu = newToggleMenuInputState;
     }
 
     private void OnApplicationFocus(bool hasFocus)
