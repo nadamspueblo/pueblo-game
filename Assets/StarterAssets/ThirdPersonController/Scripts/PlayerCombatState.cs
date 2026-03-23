@@ -34,36 +34,46 @@ public class PlayerCombatState : MonoBehaviour
   {
     if (tpc == null || input == null) return;
 
-    // 1. Determine the Stance based on input
-    // (Assuming you have a crouch/sneak boolean in your Input system)
-    /* if (input.crouch) 
+    // Handle the crouch toggle first
+    if (input.crouch)
     {
-        currentStance = CombatStance.Sneak;
+        // If we are sneaking, exit. If we aren't, enter sneak.
+        currentStance = (currentStance == CombatStance.Sneak) ? 
+                        (input.aim ? CombatStance.Combat : CombatStance.Standard) : 
+                        CombatStance.Sneak;
+        input.crouch = false; 
     }
-    else 
-    */
-    if (input.aim)
+    // If we aren't locked in a crouch, constantly evaluate the aim button
+    else if (currentStance != CombatStance.Sneak)
     {
-      currentStance = CombatStance.Combat;
-      tpc.ChangeState(PlayerMovementState.CombatStrafe);
-    }
-    else
-    {
-      currentStance = CombatStance.Standard;
-      tpc.ChangeState(PlayerMovementState.FreeExplore);
+        currentStance = input.aim ? CombatStance.Combat : CombatStance.Standard;
     }
 
-    // Prevent rogue attacks if we are just walking around in Standard stance
-    if (currentStance == CombatStance.Standard)
+    // Make sure we're in the right movement state
+    // Remember: ChangeState only changes if it's a new state
+    switch (currentStance)
     {
-      input.lightAttack = false;
-      input.heavyAttack = false;
-      input.specialAttack = false;
-      input.block = false;
-    }
-    else if (currentStance == CombatStance.Combat)
-    {
-      input.jump = false;
+        case CombatStance.Standard:
+            tpc.ChangeState(PlayerMovementState.FreeExplore);
+            input.lightAttack = false;
+            input.heavyAttack = false;
+            input.specialAttack = false;
+            input.block = false;
+            break;
+
+        case CombatStance.Combat:
+            tpc.ChangeState(PlayerMovementState.CombatStrafe);
+            input.jump = false; // No jumping while aiming
+            break;
+
+        case CombatStance.Sneak:
+            tpc.ChangeState(PlayerMovementState.Sneak);
+            input.lightAttack = false;
+            input.heavyAttack = false;
+            input.specialAttack = false;
+            input.block = false;
+            input.jump = false; // No jumping while sneaking
+            break;
     }
   }
 

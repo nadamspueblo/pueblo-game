@@ -13,6 +13,7 @@ namespace StarterAssets
     public bool jump;
     public bool sprint;
     public bool interact;
+    public bool crouch;
 
     [Header("Combat Input Values")]
     public bool aim;
@@ -75,6 +76,8 @@ namespace StarterAssets
     {
       InteractInput(value.isPressed);
     }
+
+    public void OnCrouch(InputValue value) { crouch = value.isPressed; }
 
     public void OnAim(InputValue value) { AimInput(value.isPressed); }
     public void OnBlock(InputValue value) { block = value.isPressed; }

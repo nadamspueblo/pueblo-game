@@ -3253,6 +3253,7 @@ MonoBehaviour:
   jump: 0
   sprint: 0
   interact: 0
+  crouch: 0
   aim: 0
   block: 0
   lightAttack: 0
@@ -4489,6 +4490,7 @@ MonoBehaviour:
   currentState: 0
   MoveSpeed: 4
   SprintSpeed: 5.335
+  SneakSpeed: 2
   RotationSmoothTime: 0.12
   SpeedChangeRate: 3
   JumpHeight: 1.2
@@ -4528,6 +4530,10 @@ MonoBehaviour:
   onGrappleBreak:
     m_PersistentCalls:
       m_Calls: []
+  normalHeight: 1.95
+  normalCenterY: 0.93
+  sneakHeight: 1.31
+  sneakCenterY: 0.62
   forwardDrift: 0
   backwardDrift: 0
   leftStrafeDrift: 0

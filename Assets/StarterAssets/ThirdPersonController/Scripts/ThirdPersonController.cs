@@ -35,6 +35,9 @@ namespace StarterAssets
     [Tooltip("Sprint speed of the character in m/s")]
     public float SprintSpeed = 5.335f;
 
+    [Tooltip("Sneak speed of the character in m/s")]
+    public float SneakSpeed = 1.0f;
+
     [Tooltip("How fast the character turns to face movement direction")]
     [Range(0.0f, 0.3f)]
     public float RotationSmoothTime = 0.12f;
@@ -103,6 +106,12 @@ namespace StarterAssets
     public AttackController attackController;
     public UnityEvent onGrappleBreak;
     private float grappleBreakTimeLimit = 0f;
+
+    [Header("Sneak Capsule Adjustments")]
+    public float normalHeight = 1.8f;
+    public float normalCenterY = 0.9f;
+    public float sneakHeight = 1.2f;
+    public float sneakCenterY = 0.6f;
 
     [Header("Animation Drift Corrections")]
     [Tooltip("Adjust these to fix diagonal root motion from Mixamo animations")]
@@ -235,6 +244,11 @@ namespace StarterAssets
           GroundedCheck();
           CombatStrafe();
           break;
+        case PlayerMovementState.Sneak:
+          ApplyGravity();
+          GroundedCheck();
+          SneakMove();
+          break;
         case PlayerMovementState.Grappled:
           ApplyGravity();
           GroundedCheck();
@@ -249,7 +263,7 @@ namespace StarterAssets
 
       // Prevents changing state until grapple is broken using SetState
       if (currentState == PlayerMovementState.Grappled) return;
-      
+
       SetState(newState);
     }
 
@@ -260,14 +274,33 @@ namespace StarterAssets
       {
         case PlayerMovementState.FreeExplore:
           _animator.SetBool("IsCombat", false);
+          _animator.SetBool("IsSneaking", false);
+          // Restore full height
+          _controller.height = normalHeight;
+          _controller.center = new Vector3(0, normalCenterY, 0);
           break;
         case PlayerMovementState.CombatStrafe:
           _animator.SetBool("IsCombat", true);
+          _animator.SetBool("IsSneaking", false);
+          // Restore full height
+          _controller.height = normalHeight;
+          _controller.center = new Vector3(0, normalCenterY, 0);
+          break;
+        case PlayerMovementState.Sneak:
+          _animator.SetBool("IsCombat", false);
+          _animator.SetBool("IsSneaking", true);
+          // Shrink the capsule
+          _controller.height = sneakHeight;
+          _controller.center = new Vector3(0, sneakCenterY, 0);
           break;
         case PlayerMovementState.Grappled:
+          // Restore full height
+          _controller.height = normalHeight;
+          _controller.center = new Vector3(0, normalCenterY, 0);
           break;
         default:
           _animator.SetBool("IsCombat", false);
+          _animator.SetBool("IsSneaking", false);
           break;
       }
     }
@@ -477,6 +510,54 @@ namespace StarterAssets
       }
     }
 
+    private void SneakMove()
+    {
+      // 1. Hard-cap the target speed (no sprinting allowed)
+      float targetSpeed = SneakSpeed;
+      if (_input.move == Vector2.zero) targetSpeed = 0.0f;
+
+      float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
+      float speedOffset = 0.1f;
+      float inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
+
+      if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset)
+      {
+        _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * SpeedChangeRate);
+        _speed = Mathf.Round(_speed * 1000f) / 1000f;
+      }
+      else
+      {
+        _speed = targetSpeed;
+      }
+
+      _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
+      if (_animationBlend < 0.01f) _animationBlend = 0f;
+
+      // 2. Rotate the player to face the input direction
+      Vector3 inputDirection = new Vector3(_input.move.x, 0.0f, _input.move.y).normalized;
+
+      if (_input.move != Vector2.zero)
+      {
+        _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
+        float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
+        transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+      }
+
+      _currentMovementDir = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+
+      if (_input.move == Vector2.zero)
+      {
+        _currentMovementDir = Vector3.zero;
+      }
+
+      // 3. Update the Animator
+      if (_hasAnimator)
+      {
+        _animator.SetFloat(_animIDSpeed, _animationBlend);
+        _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
+      }
+    }
+
     private void ApplyGravity()
     {
       if (Grounded)
@@ -559,7 +640,7 @@ namespace StarterAssets
       }
     }
 
-    public void StartGrapple(float breakTime) 
+    public void StartGrapple(float breakTime)
     {
       SetState(PlayerMovementState.Grappled);
       grappleBreakTimeLimit = Time.time + breakTime;
@@ -604,11 +685,27 @@ namespace StarterAssets
     {
       if (animationEvent.animatorClipInfo.weight > 0.5f)
       {
-        noiseMaker.MakeNoise(20f);
+        // Dynamically calculate the noise radius based on our FSM state!
+        float currentNoiseRadius = 20f;
+
+        if (currentState == PlayerMovementState.Sneak)
+        {
+          currentNoiseRadius = 5f; // Sneaking is very quiet
+        }
+        else if (_input.sprint && _speed > MoveSpeed + 0.5f)
+        {
+          currentNoiseRadius = 40f; // Sprinting is extremely loud
+        }
+
+        if (noiseMaker != null) noiseMaker.MakeNoise(currentNoiseRadius);
+
+        // Optional: Also reduce the audio volume of the footstep clip itself when sneaking
+        float currentVolume = (currentState == PlayerMovementState.Sneak) ? FootstepAudioVolume * 0.3f : FootstepAudioVolume;
+
         if (FootstepAudioClips.Length > 0)
         {
           var index = Random.Range(0, FootstepAudioClips.Length);
-          AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(_controller.center), FootstepAudioVolume);
+          AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(_controller.center), currentVolume);
         }
       }
     }
