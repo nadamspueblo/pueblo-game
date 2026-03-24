@@ -5366,7 +5366,7 @@ MonoBehaviour:
   playerAnimator: {fileID: 6982812146354924982}
   attackController: {fileID: 6982812146354924990}
   stats: {fileID: 6982812146354924983}
-  isReacting: 0
+  isGrappled: 0
 --- !u!114 &6982812146354924988
 MonoBehaviour:
   m_ObjectHideFlags: 0

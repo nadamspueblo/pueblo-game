@@ -658,6 +658,17 @@ namespace StarterAssets
         // Consume the input to prevent a jump
         _input.block = false;
       }
+      else
+      {
+        _input.block = false;
+      }
+
+      // Cancel all inputs
+      _input.jump = false;
+      _input.crouch = false;
+      _input.lightAttack = false;
+      _input.heavyAttack = false;
+      _input.specialAttack = false;
     }
 
     private static float ClampAngle(float lfAngle, float lfMin, float lfMax)

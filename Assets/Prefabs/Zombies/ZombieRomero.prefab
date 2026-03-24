@@ -1911,8 +1911,8 @@ MonoBehaviour:
   attackDistance: 1.5
   attackCooldown: 2
   biteCooldown: 3
-  circlingRadius: 2
-  maxCirclingTime: 2
+  circlingRadius: 1.5
+  maxCirclingTime: 1
   combatMagnetism: {fileID: 5198206570699527643}
   separationRadius: 0.8
   separationForce: 2.5

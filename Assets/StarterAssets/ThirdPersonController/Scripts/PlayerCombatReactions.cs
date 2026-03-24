@@ -9,8 +9,8 @@ public class PlayerCombatReactions : MonoBehaviour
   public Animator playerAnimator;
   public AttackController attackController;
   public SurvivalStats stats;
-  public bool isReacting = false;
   private ZombieAdvancedAI attackingZombie;
+  public bool isGrappled = false;
 
   void Start()
   {
@@ -35,8 +35,7 @@ public class PlayerCombatReactions : MonoBehaviour
     {
       //thirdPersonController.SetGrappleState(true, zombie);
       attackingZombie = zombie;
-      thirdPersonController.StartGrapple(1.0f);
-      isReacting = true;
+      thirdPersonController.StartGrapple(0.7f);
       playerAnimator.SetBool("IsGrappled", true);
       playerAnimator.SetTrigger("Struggle");
       StartCoroutine(HitPauseRoutine(duration));
@@ -47,6 +46,14 @@ public class PlayerCombatReactions : MonoBehaviour
   {
     attackingZombie.BreakGrapple();
     playerAnimator.SetBool("IsGrappled", false);
+    isGrappled = false;
+  }
+
+  public void EndBiteGrapple()
+  {
+    playerAnimator.SetBool("IsGrappled", false);
+    isGrappled = false;
+    thirdPersonController.SetState(PlayerMovementState.FreeExplore);
   }
 
   // This function automatically runs whenever the event fires
@@ -82,10 +89,29 @@ public class PlayerCombatReactions : MonoBehaviour
   private IEnumerator HitPauseRoutine(float duration)
   {
     Time.timeScale = 0.1f;
+    Time.fixedDeltaTime = 0.02f * Time.timeScale;
     yield return new WaitForSecondsRealtime(duration);
     Time.timeScale = 1f;
-    isReacting = false;
-    thirdPersonController.SetState(PlayerMovementState.FreeExplore);
-    playerAnimator.SetBool("IsGrappled", false);
+    Time.fixedDeltaTime = 0.02f;
+  }
+
+  private IEnumerator BiteGrappleRoutine(float duration)
+  {
+    float timer = 0f;
+    isGrappled = true;
+    
+    // Slow time
+    Time.timeScale = 0.1f;
+    Time.fixedDeltaTime = 0.02f * Time.timeScale;
+
+    while (isGrappled && timer < duration)
+    {
+      timer += Time.deltaTime;
+      yield return null;
+    }
+
+    // Return to normal time
+    Time.timeScale = 1f;
+    Time.fixedDeltaTime = 0.02f;
   }
 }
