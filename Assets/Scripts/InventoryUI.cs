@@ -13,9 +13,10 @@ public class InventoryUI : MonoBehaviour
   public Inventory3DPreview studio;
   public GameObject player;
   public ThirdPersonController playerController;
-  public SurvivalStats  survivalStats;
+  public SurvivalStats survivalStats;
 
   [Header("Input Keys")]
+  public StarterAssetsInputs input;
   public KeyCode toggleInventoryKey = KeyCode.Tab;
   public KeyCode cycleLeftKey = KeyCode.A;
   public KeyCode cycleRightKey = KeyCode.D;
@@ -33,9 +34,10 @@ public class InventoryUI : MonoBehaviour
   void Update()
   {
     // 1. Toggle the Inventory Open/Closed
-    if (Input.GetKeyDown(toggleInventoryKey))
+    if (input.toggleMenu)
     {
       ToggleInventory();
+      input.toggleMenu = false;
     }
 
     // 2. Handle Inputs ONLY if the inventory is open
@@ -55,7 +57,8 @@ public class InventoryUI : MonoBehaviour
       ShowInventory();
 
       // FREEZE THE PLAYER
-      if (playerController != null) {
+      if (playerController != null)
+      {
         playerController.enabled = false;
         playerController.ResetAnimationsToIdle();
       }
@@ -87,14 +90,16 @@ public class InventoryUI : MonoBehaviour
   {
     if (InventoryManager.Instance.items.Count <= 0) return;
 
-    if (Input.GetKeyDown(cycleRightKey))
+    if (input.menuRight)
     {
+      input.menuRight = false;
       currentIndex++;
       if (currentIndex >= InventoryManager.Instance.items.Count) currentIndex = 0; // Wrap around
       UpdateDisplay();
     }
-    else if (Input.GetKeyDown(cycleLeftKey))
+    else if (input.menuLeft)
     {
+      input.menuLeft = false;
       currentIndex--;
       if (currentIndex < 0) currentIndex = InventoryManager.Instance.items.Count - 1; // Wrap around
       UpdateDisplay();
@@ -107,16 +112,31 @@ public class InventoryUI : MonoBehaviour
 
     ItemData currentItem = InventoryManager.Instance.items[currentIndex];
 
-    if (Input.GetKeyDown(useKey))
+    if (input.use)
     {
-      Debug.Log("Used item: " + currentItem.itemName);
-      // Restore the appropriate stat
-      survivalStats.RestoreStat(currentItem.statToRestore, currentItem.restoreAmount);
-
-      ConsumeCurrentItem();
+      input.use = false;
+      switch (currentItem.type)
+      {
+        case ItemType.Consumable:
+          Debug.Log("Used item: " + currentItem.itemName);
+          // Restore the appropriate stat
+          survivalStats.RestoreStat(currentItem.statToRestore, currentItem.restoreAmount);
+          ConsumeCurrentItem();
+          break;
+        case ItemType.Weapon:
+          EquipWeapon(currentItem);
+          break;
+        default:
+          Debug.Log("Used item: " + currentItem.itemName);
+          // Restore the appropriate stat
+          survivalStats.RestoreStat(currentItem.statToRestore, currentItem.restoreAmount);
+          ConsumeCurrentItem();
+          break;
+      }
     }
-    else if (Input.GetKeyDown(dropKey))
+    else if (input.drop)
     {
+      input.drop = false;
       Debug.Log("Dropped item: " + currentItem.itemName);
       // TODO: Instantiate the 3D prefab on the ground in front of the player later
       Vector3 location = new Vector3(player.transform.position.x + 0.3f, player.transform.position.y + 0.3f, player.transform.position.z + 0.3f);
@@ -184,5 +204,12 @@ public class InventoryUI : MonoBehaviour
       inventoryGroup.interactable = false; // Disable interactions
       inventoryGroup.blocksRaycasts = false; // Let clicks pass through to the game
     }
+  }
+
+  void EquipWeapon(ItemData weaponItem) 
+  {
+    // Assign the references
+    PlayerCombatState combatState = player.GetComponent<PlayerCombatState>(); 
+    combatState.EquipWeapon(weaponItem);
   }
 }

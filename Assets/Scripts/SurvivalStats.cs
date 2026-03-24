@@ -28,10 +28,14 @@ public class SurvivalStats : MonoBehaviour
   public float exhaustionDelay = 3.0f;   // Wait 3 seconds if the bar hits absolute zero!
   public bool isExhausted = false;
 
+  [Header("Component References")]
+  public AttackController attackController;
+
   [Header("Events")]
   // We will use these later to tell the UI Canvas to update its bars
   public UnityEvent onStatsChanged;
   public UnityEvent onPlayerDeath;
+  public UnityEvent<float, Transform> onTakeDamage;
 
   private float nextStaminaRegenTime = 0f;
 
@@ -43,6 +47,8 @@ public class SurvivalStats : MonoBehaviour
     currentThirst = maxThirst;
     currentSleep = maxSleep;
     currentStamina = maxStamina;
+
+    if (attackController == null) attackController = GetComponent<AttackController>();
   }
 
   void Update()
@@ -67,7 +73,7 @@ public class SurvivalStats : MonoBehaviour
     // 4. The Consequences! If starving or dehydrated, slowly drain health
     if (currentHunger <= 0 || currentThirst <= 0)
     {
-      TakeDamage(2f * Time.deltaTime);
+      TakeDamage(2f * Time.deltaTime, null);
     }
 
     // Fire off a message that stats have changed for UI update
@@ -92,10 +98,11 @@ public class SurvivalStats : MonoBehaviour
 
   // --- PUBLIC METHODS FOR OTHER SCRIPTS TO USE ---
 
-  public void TakeDamage(float amount)
+  public void TakeDamage(float amount, Transform attackerTransform)
   {
-    currentHealth -= amount;
+    currentHealth -= attackController.isBlocking && UseStamina(attackController.blockStamina) ? 0.5f * amount : amount;
     currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+    onTakeDamage?.Invoke(amount, attackerTransform);
 
     if (currentHealth <= 0)
     {
