@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MedKit
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   itemName: Medkit
-  description: 'Heals the player on use '
+  description: Fix Boo boo?
   icon: {fileID: 0}
   isConsumable: 1
   isCraftingMaterial: 0
