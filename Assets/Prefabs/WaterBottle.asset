@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: WaterBottle
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   itemName: Water Bottle
-  description: Fills players thirst
+  description: 'oooo water
+
+'
   icon: {fileID: 0}
   isConsumable: 1
   isCraftingMaterial: 0
   statToRestore: thirst
   restoreAmount: 30
-  itemPrefab: {fileID: 1216505430168376, guid: 8e862d7ff65bc4368abdf49f5f164e01, type: 3}
+  itemPrefab: {fileID: 5487716183923051851, guid: ae142ae4a21b54b2fb34b46d528fc67f, type: 3}
