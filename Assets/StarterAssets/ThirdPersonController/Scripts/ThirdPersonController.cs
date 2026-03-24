@@ -648,6 +648,25 @@ namespace StarterAssets
 
     private void GrappleCheck()
     {
+      // Cancel all inputs besides block
+      _input.jump = false;
+      _input.crouch = false;
+      _input.lightAttack = false;
+      _input.heavyAttack = false;
+      _input.specialAttack = false;
+
+      // Slow the player
+      _speed = 0f;
+      _animationBlend = Mathf.Lerp(_animationBlend, _speed, Time.deltaTime * SpeedChangeRate);
+      if (_hasAnimator)
+      {
+        _animator.SetFloat(_animIDSpeed, _animationBlend);
+        _animator.SetFloat(_animIDMotionSpeed, 0f);
+      }
+      
+      if (_animationBlend < 0.01f) _animationBlend = 0f;
+
+      // Check for grab break
       if (_input.block && Time.time <= grappleBreakTimeLimit && survivalStats.UseStamina(attackController.breakGrabStamina))
       {
         SetState(PlayerMovementState.FreeExplore);
@@ -655,7 +674,7 @@ namespace StarterAssets
         // Invoke event
         onGrappleBreak?.Invoke();
 
-        // Consume the input to prevent a jump
+        // Consume the input
         _input.block = false;
       }
       else
@@ -663,12 +682,7 @@ namespace StarterAssets
         _input.block = false;
       }
 
-      // Cancel all inputs
-      _input.jump = false;
-      _input.crouch = false;
-      _input.lightAttack = false;
-      _input.heavyAttack = false;
-      _input.specialAttack = false;
+      
     }
 
     private static float ClampAngle(float lfAngle, float lfMin, float lfMax)

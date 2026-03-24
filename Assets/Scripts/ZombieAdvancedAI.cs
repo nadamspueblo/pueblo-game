@@ -20,6 +20,7 @@ public class ZombieAdvancedAI : MonoBehaviour
   public float alertScreamRadius = 30f; // How far the scream travels
   public RagdollManager ragdollManager;
   public SurvivalStats survivalStats;
+  public PlayerCombatReactions combatReactions;
 
   [Header("Combat & Movement")]
   public float wanderRadius = 10f;
@@ -32,7 +33,7 @@ public class ZombieAdvancedAI : MonoBehaviour
   public float attackDistance = 1.5f;
   public float attackCooldown = 2f;
   private float lastAttackTime;
-  public float biteCooldown = 3f;
+  public float biteCooldown = 10f;
   private float lastBiteTime;
   private bool isGrappleBroken = false; // Breaks the bite grapple when true
   public float circlingRadius = 2.3f;
@@ -101,6 +102,9 @@ public class ZombieAdvancedAI : MonoBehaviour
 
     // Survival stats for dealing direct damage from bites
     survivalStats = player.GetComponent<SurvivalStats>();
+
+    // Combat reactions
+    combatReactions = player.GetComponent<PlayerCombatReactions>();
 
     // Random avoidance priorities to help with avoidance logic
     if (agent != null)
@@ -321,14 +325,11 @@ public class ZombieAdvancedAI : MonoBehaviour
         agent.SetDestination(GetCirclingPoint(2f, Random.value > 0.5f));
         break;
       case ZombieState.QuickBite:
+        animator.ResetTrigger("Attack");
         PlayerCombatReactions combatReactions = player.GetComponent<PlayerCombatReactions>();
         if (!combatReactions.isGrappled)
         {
           StartCoroutine(ExecuteGrappleAttack());
-        }
-        else
-        {
-          lastBiteTime = Time.time;
         }
         break;
       case ZombieState.Wander:
@@ -502,7 +503,7 @@ public class ZombieAdvancedAI : MonoBehaviour
   private IEnumerator TurnIntoStaticCorpse()
   {
     // 1. Give the ragdoll 5 seconds to fall, bounce, and settle on the floor
-    yield return new WaitForSeconds(5f);
+    yield return new WaitForSeconds(3f);
 
     RootMotionAnimation rootMotion = GetComponent<RootMotionAnimation>();
     Destroy(rootMotion);
@@ -623,8 +624,6 @@ public class ZombieAdvancedAI : MonoBehaviour
 
   private IEnumerator ExecuteGrappleAttack()
   {
-    PlayerCombatReactions combatReactions = player.GetComponent<PlayerCombatReactions>();
-
     lastBiteTime = Time.time;
     // 1. Lock the movement systems
     RootMotionAnimation rootMotion = GetComponent<RootMotionAnimation>();
@@ -655,10 +654,10 @@ public class ZombieAdvancedAI : MonoBehaviour
 
     // 3. We are in position. Play the animation!
     isGrappleBroken = false;
-    animator.SetTrigger("QuickBite");
+    animator.SetTrigger("NeckBite");
 
     // 4. THE STICKY PHASE (Hold on for the duration of the animation)
-    float biteDuration = 2.5f; // Adjust to your specific clip length
+    float biteDuration = 4.07f; // Adjust to your specific clip length
     float biteTimer = 0f;
     bool hasTriggeredReaction = false;
 
@@ -666,10 +665,10 @@ public class ZombieAdvancedAI : MonoBehaviour
     while (biteTimer < biteDuration)
     {
       // Start the players reaction after the attack has already begun
-      if (combatReactions != null && !hasTriggeredReaction && biteTimer / biteDuration > 0.3)
+      if (combatReactions != null && !hasTriggeredReaction)
       {
         hasTriggeredReaction = true;
-        combatReactions.ReactToBite(0.8f, this);
+        combatReactions.ReactToGrapple(1.3f, this);
       }
 
       if (isGrappleBroken)
@@ -702,7 +701,7 @@ public class ZombieAdvancedAI : MonoBehaviour
     if (!isGrappleBroken)
     {
       // They didn't escape in time. Apply the damage!
-      survivalStats.TakeDamage(50f, transform);
+      //survivalStats.TakeDamage(50f, transform);
       combatReactions.EndBiteGrapple();
     }
 
@@ -841,6 +840,13 @@ public class ZombieAdvancedAI : MonoBehaviour
   public void BreakGrapple()
   {
     isGrappleBroken = true;
+    animator.ResetTrigger("NeckBite");
     animator.SetTrigger("FallBack");
+  }
+
+  public void Event_Bite()
+  {
+    survivalStats.TakeDamage(40f, transform);
+    combatReactions.ReactToBite();
   }
 }

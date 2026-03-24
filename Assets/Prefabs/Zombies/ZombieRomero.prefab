@@ -1904,13 +1904,14 @@ MonoBehaviour:
   alertScreamRadius: 30
   ragdollManager: {fileID: 7093953700232513509}
   survivalStats: {fileID: 0}
+  combatReactions: {fileID: 0}
   wanderRadius: 10
   wanderTimer: 5
   walkSpeed: 5
   chaseSpeed: 10
   attackDistance: 1.5
   attackCooldown: 2
-  biteCooldown: 3
+  biteCooldown: 10
   circlingRadius: 1.5
   maxCirclingTime: 1
   combatMagnetism: {fileID: 5198206570699527643}

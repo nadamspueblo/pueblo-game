@@ -23,7 +23,7 @@ public class PlayerCombatReactions : MonoBehaviour
     thirdPersonController.onGrappleBreak.AddListener(BreakGrapple);
   }
 
-  public void ReactToBite(float duration, ZombieAdvancedAI zombie)
+  public void ReactToGrapple(float duration, ZombieAdvancedAI zombie)
   {
     if (playerAnimator == null || zombie == null) return;
     if (attackController.isBlocking && stats.UseStamina(attackController.blockStamina))
@@ -37,7 +37,7 @@ public class PlayerCombatReactions : MonoBehaviour
       attackingZombie = zombie;
       thirdPersonController.StartGrapple(0.7f);
       playerAnimator.SetBool("IsGrappled", true);
-      playerAnimator.SetTrigger("Struggle");
+      isGrappled = true;
       StartCoroutine(HitPauseRoutine(duration));
     }
   }
@@ -47,6 +47,11 @@ public class PlayerCombatReactions : MonoBehaviour
     attackingZombie.BreakGrapple();
     playerAnimator.SetBool("IsGrappled", false);
     isGrappled = false;
+  }
+
+  public void ReactToBite()
+  {
+
   }
 
   public void EndBiteGrapple()
@@ -99,7 +104,7 @@ public class PlayerCombatReactions : MonoBehaviour
   {
     float timer = 0f;
     isGrappled = true;
-    
+
     // Slow time
     Time.timeScale = 0.1f;
     Time.fixedDeltaTime = 0.02f * Time.timeScale;
