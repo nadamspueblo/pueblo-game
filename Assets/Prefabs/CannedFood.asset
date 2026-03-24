@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b020e56fcdede4469dfd894994a3d0e, type: 3}
   m_Name: CannedFood
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemName: canned beans
-  description: 'Fills players hunger
+  itemName: Canned Beans
+  description: 'Mmm beans
 
 '
   icon: {fileID: 0}

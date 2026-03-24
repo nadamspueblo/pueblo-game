@@ -8,7 +8,7 @@ public class HealthManager : MonoBehaviour
     public float currentHealth;
 
     [Header("Events")]
-    public UnityEvent onTakeDamage;
+    public UnityEvent<float, Transform> onTakeDamage;
     public UnityEvent onDeath;
 
     private bool isDead = false;
@@ -18,11 +18,11 @@ public class HealthManager : MonoBehaviour
         currentHealth = maxHealth;
     }
 
-    public void TakeDamage(float amount)
+    public void TakeDamage(float damage, Transform attacker)
     {
         if (isDead) return; // Prevent taking damage after death
 
-        currentHealth -= amount;
+        currentHealth -= damage;
         Debug.Log(gameObject.name + " took damage! Health is now: " + currentHealth);
 
         if (currentHealth <= 0)
@@ -33,7 +33,7 @@ public class HealthManager : MonoBehaviour
         }
         else 
         {
-            onTakeDamage?.Invoke(); // Shout that we got hit!
+            onTakeDamage?.Invoke(damage, attacker); // Shout that we got hit!
         }
     }
 

@@ -105,10 +105,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: ParkingCurb
       objectReference: {fileID: 0}
-    - target: {fileID: 7817821189837932028, guid: 847eb1c97ec473b4699b8d5ebc0313dd, type: 3}
-      propertyPath: 'm_Materials.Array.data[0]'
-      value: 
-      objectReference: {fileID: 2100000, guid: cfac1bf18699f416bac55bf6bcb3cf5f, type: 2}
     - target: {fileID: 8297770198988437010, guid: 847eb1c97ec473b4699b8d5ebc0313dd, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.9449997
@@ -151,7 +147,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8915876812252468966, guid: 847eb1c97ec473b4699b8d5ebc0313dd, type: 3}
       propertyPath: m_VersionIndex
-      value: 1314
+      value: 1320
       objectReference: {fileID: 0}
     - target: {fileID: 8915876812252468966, guid: 847eb1c97ec473b4699b8d5ebc0313dd, type: 3}
       propertyPath: m_SelectedEdges.Array.size
