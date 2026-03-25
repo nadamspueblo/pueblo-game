@@ -8,6 +8,7 @@ public class DoorBarricade : MonoBehaviour
     public List<GameObject> boards = new List<GameObject>(); // Drag your 2x4 board objects here
     public float interactionDistance = 2f;
     public float removalTime = 1.5f; // Time to rip off each board
+    public StarterAssetsInputs input;
     
     [Header("UI")]
     public GameObject interactionPrompt; // UI element showing "Press E to remove board"
@@ -28,6 +29,7 @@ public class DoorBarricade : MonoBehaviour
         if (playerObject != null)
         {
             player = playerObject.transform;
+            input = player.GetComponent<StarterAssetsInputs>();
         }
     
         if (interactionPrompt != null)
@@ -48,9 +50,10 @@ public class DoorBarricade : MonoBehaviour
                     interactionPrompt.SetActive(true);
                 
                 // Check for input (assuming standard input system)
-                if (Input.GetKeyDown(KeyCode.E))
+                if (input.interact)
                 {
                     StartCoroutine(RemoveBoard());
+                    input.interact = false;
                 }
             }
             else
@@ -100,29 +103,29 @@ public class DoorBarricade : MonoBehaviour
         
         // Apply force to make it look like it was ripped off
         Vector3 forceDirection = (boardToRemove.transform.position - player.position).normalized;
-        forceDirection += Vector3.up * 0.5f; // Add some upward force
-        rb.AddForce(forceDirection * -5f, ForceMode.Impulse);
+        forceDirection = Vector3.up * 0.5f; // Add some upward force
+        rb.AddForce(Vector3.forward * 5f, ForceMode.Impulse);
         
         // Move to next board
         currentBoardIndex++;
         
         // If all boards are removed, you might want to trigger something
-        if (currentBoardIndex >= boards.Count)
-        {
-            OnAllBoardsRemoved();
-        }
+        //if (currentBoardIndex >= boards.Count)
+        //{
+       //     OnAllBoardsRemoved();
+        //}
         
         isRemoving = false;
     }
     
-    void OnAllBoardsRemoved()
-    {
+    //void OnAllBoardsRemoved()
+    //{
         // This is where you can add logic for what happens when the doorway is clear
-        Debug.Log("Doorway cleared! Player can now pass through.");
+        //Debug.Log("Doorway cleared! Player can now pass through.");
         
         // Maybe enable a door script, update NavMesh, etc.
         // You could also trigger a sound effect or particle effect here
-    }
+    //}
     
     // Visual helper in Scene view
     void OnDrawGizmosSelected()
