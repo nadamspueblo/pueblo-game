@@ -51,7 +51,7 @@ public class AttackController : MonoBehaviour
 
   private int currentComboStep = 0;
   private float lastAttackTime = 0f;
-  private bool isAttacking = false;
+  public bool isAttacking = false;
   private bool hasBufferedInput = false;
   private AttackInputType bufferedInputType;
   public bool isBlocking = false;
