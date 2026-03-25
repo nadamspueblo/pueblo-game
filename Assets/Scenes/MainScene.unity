@@ -5456,6 +5456,7 @@ MonoBehaviour:
     animatorTrigger: Light1HR
     rootTwistCorrection: -60
   comboResetTime: 1.5
+  isAttacking: 0
   isBlocking: 0
   maxAttackDuration: 2.5
 --- !u!4 &6983258932136875375
