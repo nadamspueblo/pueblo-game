@@ -8,6 +8,9 @@ public class ZombieAdvancedAI : MonoBehaviour
 {
   public enum ZombieState { Wander, Investigate, Chase, Attack, Feeding, Scream, Unconscious, StandUp, Crawling, Circling, QuickBite, Dead }
 
+  [Header("References")]
+  public AttackController playerAttackController;
+
   [Header("Current State")]
   public ZombieState currentState = ZombieState.Wander;
 
@@ -87,6 +90,7 @@ public class ZombieAdvancedAI : MonoBehaviour
     animator = GetComponentInChildren<Animator>();
     healthManager = GetComponent<HealthManager>();
     player = GameObject.FindWithTag("Player").transform;
+    playerAttackController = player.GetComponent<AttackController>();
 
     timer = wanderTimer;
     SetNextGrowlTime();
@@ -175,7 +179,7 @@ public class ZombieAdvancedAI : MonoBehaviour
     // If the zombie is trying to maneuver around the player...
     if (other.CompareTag("Player"))
     {
-      if (Time.time >= lastBiteTime + biteCooldown)
+      if (Time.time >= lastBiteTime + biteCooldown && !playerAttackController.isAttacking)
       {
         if (currentState == ZombieState.Circling || currentState == ZombieState.Chase)
         {
@@ -426,7 +430,7 @@ public class ZombieAdvancedAI : MonoBehaviour
     agent.isStopped = true;
     animator.speed = 1f;
 
-    if (Time.time >= lastAttackTime + attackCooldown)
+    if (Time.time >= lastAttackTime + attackCooldown && !playerAttackController.isAttacking)
     {
       // Attack variation
       float value = Random.value;
