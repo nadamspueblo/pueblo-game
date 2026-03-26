@@ -5,87 +5,166 @@ using UnityEngine.InputSystem;
 
 namespace StarterAssets
 {
-	public class StarterAssetsInputs : MonoBehaviour
-	{
-		[Header("Character Input Values")]
-		public Vector2 move;
-		public Vector2 look;
-		public bool jump;
-		public bool sprint;
+  public class StarterAssetsInputs : MonoBehaviour
+  {
+    [Header("Character Input Values")]
+    public Vector2 move;
+    public Vector2 look;
+    public bool jump;
+    public bool sprint;
     public bool interact;
+    public bool crouch;
 
-		[Header("Movement Settings")]
-		public bool analogMovement;
+    [Header("Combat Input Values")]
+    public bool aim;
+    public bool block;
+    public bool lightAttack;
+    public bool heavyAttack;
+    public bool specialAttack;
 
-		[Header("Mouse Cursor Settings")]
-		public bool cursorLocked = true;
-		public bool cursorInputForLook = true;
+    [Header("Movement Settings")]
+    public bool analogMovement;
+
+    [Header("Mouse Cursor Settings")]
+    public bool cursorLocked = true;
+    public bool cursorInputForLook = true;
+
+    [Header("Menu controls")]
+    public bool menuOpen = false;
+    public bool toggleMenu;
+    public bool menuLeft;
+    public bool menuRight;
+    public bool use;
+    public bool drop;
 
 #if ENABLE_INPUT_SYSTEM
-		public void OnMove(InputValue value)
-		{
-			MoveInput(value.Get<Vector2>());
-		}
+    public void OnMove(InputValue value)
+    {
+      MoveInput(value.Get<Vector2>());
+    }
 
-		public void OnLook(InputValue value)
-		{
-			if(cursorInputForLook)
-			{
-				LookInput(value.Get<Vector2>());
-			}
-		}
+    public void OnLook(InputValue value)
+    {
+      if (cursorInputForLook)
+      {
+        LookInput(value.Get<Vector2>());
+      }
+    }
 
-		public void OnJump(InputValue value)
-		{
-			JumpInput(value.isPressed);
-		}
+    public void OnJump(InputValue value)
+    {
+      if (aim)
+      {
+        // If weapon is drawn, send the Spacebar press purely to the Block variable!
+        BlockInput(value.isPressed);
+        JumpInput(false); // Guarantee jump stays off
+      }
+      else
+      {
+        // If exploring, send the Spacebar press to the Jump variable!
+        JumpInput(value.isPressed);
+        BlockInput(false); // Guarantee block stays off
+      }
+    }
 
-		public void OnSprint(InputValue value)
-		{
-			SprintInput(value.isPressed);
-		}
+    public void OnSprint(InputValue value)
+    {
+      SprintInput(value.isPressed);
+    }
 
     public void OnInteract(InputValue value)
     {
-        InteractInput(value.isPressed);
+      InteractInput(value.isPressed);
     }
+
+    public void OnCrouch(InputValue value) { crouch = value.isPressed; }
+
+    public void OnAim(InputValue value) { AimInput(value.isPressed); }
+    public void OnBlock(InputValue value) { block = value.isPressed; }
+    public void OnLightAttack(InputValue value) { lightAttack = value.isPressed; }
+    public void OnHeavyAttack(InputValue value) { heavyAttack = value.isPressed; }
+    public void OnSpecialAttack(InputValue value) { specialAttack = value.isPressed; }
+
+    // Menu Inputs
+    public void OnToggleMenu(InputValue value)
+    {
+      toggleMenu = value.isPressed;
+      menuOpen = !menuOpen;
+    }
+    public void OnUse(InputValue value)
+    {
+      if (menuOpen)
+      {
+        use = value.isPressed;
+        interact = false;
+      }
+    }
+    public void OnDrop(InputValue value)
+    {
+      if (menuOpen) drop = value.isPressed;
+    }
+    public void OnMenuLeft(InputValue value)
+    {
+      if (menuOpen) menuLeft = value.isPressed;
+    }
+    public void OnMenuRight(InputValue value)
+    {
+      if (menuOpen) menuRight = value.isPressed;
+    }
+
+
 #endif
 
 
-		public void MoveInput(Vector2 newMoveDirection)
-		{
-			move = newMoveDirection;
-		} 
+    public void MoveInput(Vector2 newMoveDirection)
+    {
+      move = newMoveDirection;
+    }
 
-		public void LookInput(Vector2 newLookDirection)
-		{
-			look = newLookDirection;
-		}
+    public void LookInput(Vector2 newLookDirection)
+    {
+      look = newLookDirection;
+    }
 
-		public void JumpInput(bool newJumpState)
-		{
-			jump = newJumpState;
-		}
+    public void JumpInput(bool newJumpState)
+    {
+      jump = newJumpState;
+    }
 
-		public void SprintInput(bool newSprintState)
-		{
-			sprint = newSprintState;
-		}
+    public void SprintInput(bool newSprintState)
+    {
+      sprint = newSprintState;
+    }
+
+    public void AimInput(bool newAimState)
+    {
+      aim = newAimState;
+    }
+
+    public void BlockInput(bool newBlockState)
+    {
+      block = newBlockState;
+    }
 
     public void InteractInput(bool newInteractState)
     {
-        interact = newInteractState;
+      interact = newInteractState;
     }
 
-		private void OnApplicationFocus(bool hasFocus)
-		{
-			SetCursorState(cursorLocked);
-		}
+    public void ToggleMenuInput(bool newToggleMenuInputState)
+    {
+      toggleMenu = newToggleMenuInputState;
+    }
 
-		private void SetCursorState(bool newState)
-		{
-			Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
-		}
-	}
-	
+    private void OnApplicationFocus(bool hasFocus)
+    {
+      SetCursorState(cursorLocked);
+    }
+
+    private void SetCursorState(bool newState)
+    {
+      Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
+    }
+  }
+
 }

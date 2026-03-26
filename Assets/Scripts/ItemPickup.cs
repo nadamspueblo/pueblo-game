@@ -76,10 +76,11 @@ public class ItemPickup : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInZone = false;
-            playerInputs = null; 
             
             // Hide the floating text when they walk away
             if (promptCanvas != null) promptCanvas.SetActive(false); 
+            playerInputs.interact = false;
+            playerInputs = null; 
         }
     }
 }

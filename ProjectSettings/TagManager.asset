@@ -6,16 +6,17 @@ TagManager:
   tags:
   - CinemachineTarget
   - Enemy
+  - WeaponHolder
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
-  - 
-  - 
-  - 
+  - EnemyMovement
+  - EnemyHitbox
+  - PlayerWeapon
   - 
   - 
   - 

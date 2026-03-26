@@ -17,6 +17,7 @@ public class ZombieRomeroAI : MonoBehaviour
   public float rushSpeed = 4f;
   public float attackDistance = 1.5f;
   public float attackCooldown = 2f;
+  public ZombieCombatMagnetism combatMagnetism;
 
   private float speed = 1f;
   private NavMeshAgent agent;
@@ -120,10 +121,10 @@ public class ZombieRomeroAI : MonoBehaviour
         FaceTarget();
         if (Time.time >= lastAttackTime + attackCooldown + Random.Range(2f, 5f))
         {
-            PlayAttackSound();
-            AttackTarget();
-            speed = 0f;
-            animator.SetFloat("VelocityZ", speed, 0.1f, Time.deltaTime);
+          PlayAttackSound();
+          AttackTarget();
+          speed = 0f;
+          animator.SetFloat("VelocityZ", speed, 0.1f, Time.deltaTime);
         }
       }
       else
@@ -164,7 +165,16 @@ public class ZombieRomeroAI : MonoBehaviour
     if (animator != null)
     {
       animator.SetTrigger("Attack");
+      animator.SetInteger("AttackIndex", Random.Range(0, 2));
     }
+
+    if (combatMagnetism != null)
+    {
+      // Pass the player's transform to the magnetism script!
+      Debug.Log("Lunging at player");
+      combatMagnetism.LungeAtTarget(targetToChase);
+    }
+    
     lastAttackTime = Time.time;
   }
 

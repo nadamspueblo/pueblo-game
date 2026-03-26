@@ -4,6 +4,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(Animator), typeof(NavMeshAgent))]
 public class RootMotionAnimation : MonoBehaviour
 {
+    public bool ignoreRootMotion = false;
     private Animator anim;
     private NavMeshAgent agent;
 
@@ -19,6 +20,7 @@ public class RootMotionAnimation : MonoBehaviour
     // This built-in Unity function runs every frame right after the animation plays
     void OnAnimatorMove()
     {
+        if (ignoreRootMotion) return;
         // 1. THE LEASH: Yank the GPS marker back to exactly where the physical body is.
         // This completely erases any automatic forward movement the AI tried to add this frame!
         agent.nextPosition = transform.position;
