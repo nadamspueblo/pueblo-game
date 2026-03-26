@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4482206252244726}
   - component: {fileID: 33360325123001114}
   - component: {fileID: 23571070491833918}
+  - component: {fileID: 9026073161881388699}
   m_Layer: 0
   m_Name: Wagon
   m_TagString: Untagged
@@ -93,6 +94,28 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &9026073161881388699
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1070251390266868}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 4300010, guid: e9d96ffec57c82c4face56ee1063eb87, type: 3}
 --- !u!1 &1251459902159752
 GameObject:
   m_ObjectHideFlags: 0
