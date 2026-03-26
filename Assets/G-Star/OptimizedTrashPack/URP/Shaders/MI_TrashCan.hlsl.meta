@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 41434c0eb092d1d48ad3f5934e2d4a14
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302792
+  packageName: Optimized Trash Pack
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/OptimizedTrashPack/URP/Shaders/MI_TrashCan.hlsl
+  uploadId: 710583

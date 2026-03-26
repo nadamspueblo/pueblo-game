@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 5d357e597e32f6748b76e750bef28afb
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302792
+  packageName: Optimized Trash Pack
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/OptimizedTrashPack/URP/Shaders/MI_Lightroom.hlsl
+  uploadId: 710583

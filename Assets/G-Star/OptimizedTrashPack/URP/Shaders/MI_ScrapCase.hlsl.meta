@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: cb1a9caedd0cf2d418e5273c783012e2
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302792
+  packageName: Optimized Trash Pack
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/OptimizedTrashPack/URP/Shaders/MI_ScrapCase.hlsl
+  uploadId: 710583
