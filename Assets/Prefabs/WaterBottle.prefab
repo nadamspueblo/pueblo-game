@@ -264,7 +264,7 @@ GameObject:
   - component: {fileID: 1086435195270735772}
   - component: {fileID: 1227889859484067466}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: WaterBottle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
