@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: abc00000000008096783305589926227
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302792
+  packageName: Optimized Trash Pack
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/OptimizedTrashPack/URP/Shaders/MI_BottlePlastic_blue.shader
+  uploadId: 710583

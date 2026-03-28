@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ae9ae3086366e644b972187624a6aac5
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302792
+  packageName: Optimized Trash Pack
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/OptimizedTrashPack/URP/Shaders/WorldGridMaterial.hlsl
+  uploadId: 710583

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: abc00000000012751355410491489590
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302792
+  packageName: Optimized Trash Pack
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/OptimizedTrashPack/URP/Shaders/MI_CineMat_CamViewFinder.shader
+  uploadId: 710583

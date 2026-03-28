@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 231fa61540c24644a9925a85f46f746e
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302792
+  packageName: Optimized Trash Pack
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/OptimizedTrashPack/URP/Shaders/MI_BottlePlastic_green.hlsl
+  uploadId: 710583

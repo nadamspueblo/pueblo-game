@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 8c66db38fc7643f44949880dfda11332
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302792
+  packageName: Optimized Trash Pack
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/OptimizedTrashPack/URP/Shaders/UnrealCommon.cginc
+  uploadId: 710583

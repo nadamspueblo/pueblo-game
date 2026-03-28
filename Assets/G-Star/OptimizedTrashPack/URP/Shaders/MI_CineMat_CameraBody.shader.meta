@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: abc00000000008144210632230379379
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302792
+  packageName: Optimized Trash Pack
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/OptimizedTrashPack/URP/Shaders/MI_CineMat_CameraBody.shader
+  uploadId: 710583

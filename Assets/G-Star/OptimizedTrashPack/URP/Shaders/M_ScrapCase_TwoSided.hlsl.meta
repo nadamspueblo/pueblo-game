@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a9164082aae994649b2881c3813f1174
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 302792
+  packageName: Optimized Trash Pack
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/OptimizedTrashPack/URP/Shaders/M_ScrapCase_TwoSided.hlsl
+  uploadId: 710583
