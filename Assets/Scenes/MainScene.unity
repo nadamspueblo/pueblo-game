@@ -2407,7 +2407,7 @@ MonoBehaviour:
   - TerrainScene
   - LightingScene
   - MainBuildingScene
-  - CafeteriaScence
+  - CafeteriaScene
   - RoseGardenScene
 --- !u!4 &1675923982
 Transform:
