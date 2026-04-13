@@ -205,7 +205,7 @@ public class ZombieAdvancedAI : MonoBehaviour
 
   private void CheckSenses()
   {
-    if (currentState == ZombieState.Attack || currentState == ZombieState.Unconscious || currentState == ZombieState.StandUp || currentState == ZombieState.Scream) return;
+    if (currentState == ZombieState.Attack || currentState == ZombieState.StandUp || currentState == ZombieState.Scream) return;
 
     float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
@@ -213,6 +213,12 @@ public class ZombieAdvancedAI : MonoBehaviour
     if (currentState == ZombieState.Unconscious && currentUnconsciousTimer <= 0f && distanceToPlayer <= 1.5f)
     {
       ChangeState(ZombieState.StandUp); // Animation event sets next state to Wander
+      return;
+    }
+    
+    if (currentState == ZombieState.Feeding && distanceToPlayer <= 1.5f)
+    {
+      ChangeState(ZombieState.Wander);
       return;
     }
 
@@ -229,6 +235,11 @@ public class ZombieAdvancedAI : MonoBehaviour
     else
     {
       hasAlerted = false;
+    }
+
+    if (currentState == ZombieState.Unconscious || currentState == ZombieState.Feeding)
+    {
+      return;
     }
 
     // Standard Vision Check
@@ -471,11 +482,6 @@ public class ZombieAdvancedAI : MonoBehaviour
 
   private void UpdateCirclingState()
   {
-    // 1. Keep staring at the player! 
-    // Since the agent is moving to a point beside the player, forcing them to 
-    // face the player creates a very creepy "strafing" or side-stepping look.
-    //FaceTarget(); 
-
     circlingTimer += Time.deltaTime;
 
     float distanceToPlayer = Vector3.Distance(transform.position, player.position);
