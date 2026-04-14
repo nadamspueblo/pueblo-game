@@ -7,6 +7,7 @@ using UnityEngine.AI;
 public class ZombieAdvancedAI : MonoBehaviour
 {
   public enum ZombieState { Wander, Investigate, Chase, Attack, Feeding, Scream, Unconscious, StandUp, Crawling, Circling, QuickBite, Dead }
+  public int movementStyle = 0;
 
   [Header("References")]
   public AttackController playerAttackController;
@@ -99,6 +100,9 @@ public class ZombieAdvancedAI : MonoBehaviour
     // Randomly vary which animation frame the zombie starts at for variation
     AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
     animator.Play(state.fullPathHash, 0, Random.Range(0f, 1f));
+
+    // Set the movement style for the animator
+    animator.SetInteger("MovementStyle", movementStyle);
 
     // Collider references for ignoring physics
     allZombieColliders = GetComponentsInChildren<Collider>();
