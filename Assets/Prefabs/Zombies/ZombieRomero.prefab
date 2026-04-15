@@ -1893,6 +1893,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09c81c5571e1db442931a6b10b3b635a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieAdvancedAI
+  movementStyle: 0
+  playerAttackController: {fileID: 0}
   currentState: 6
   viewDistance: 15
   fieldOfView: 90
@@ -1909,7 +1911,7 @@ MonoBehaviour:
   wanderTimer: 5
   walkSpeed: 5
   chaseSpeed: 10
-  attackDistance: 1.5
+  attackDistance: 3
   attackCooldown: 2
   biteCooldown: 10
   circlingRadius: 1.5
@@ -1986,7 +1988,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36625047a6a88ba46902efdb3f6ea5ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieCombatMagnetism
-  optimalStrikeDistance: 0.9
+  optimalStrikeDistance: 2
   warpDuration: 0.2
 --- !u!114 &7093953700232513509
 MonoBehaviour:
