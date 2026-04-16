@@ -402,7 +402,7 @@ GameObject:
   - component: {fileID: 297300279}
   - component: {fileID: 297300278}
   - component: {fileID: 297300277}
-  m_Layer: 3
+  m_Layer: 8
   m_Name: RightFootHitbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}

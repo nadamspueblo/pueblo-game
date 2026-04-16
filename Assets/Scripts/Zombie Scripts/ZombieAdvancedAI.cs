@@ -188,11 +188,11 @@ public class ZombieAdvancedAI : MonoBehaviour
       {
         if (currentState == ZombieState.Circling || currentState == ZombieState.Chase)
         {
-          ChangeState(ZombieState.QuickBite);
+          //ChangeState(ZombieState.QuickBite);
         }
         if (currentState == ZombieState.Attack && Random.value > 0.5f)
         {
-          ChangeState(ZombieState.QuickBite);
+          //ChangeState(ZombieState.QuickBite);
         }
         else
         {
@@ -350,6 +350,9 @@ public class ZombieAdvancedAI : MonoBehaviour
         if (!combatReactions.isGrappled)
         {
           StartCoroutine(ExecuteGrappleAttack());
+        }
+        else {
+          ChangeState(ZombieState.Wander);
         }
         break;
       case ZombieState.Wander:
