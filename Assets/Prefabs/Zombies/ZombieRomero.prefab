@@ -1909,8 +1909,8 @@ MonoBehaviour:
   combatReactions: {fileID: 0}
   wanderRadius: 10
   wanderTimer: 5
-  walkSpeed: 5
-  chaseSpeed: 10
+  walkSpeed: 4.13
+  chaseSpeed: 6.45
   attackDistance: 3
   attackCooldown: 2
   biteCooldown: 10
@@ -1988,7 +1988,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36625047a6a88ba46902efdb3f6ea5ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieCombatMagnetism
-  optimalStrikeDistance: 2
+  optimalStrikeDistance: 1.5
   warpDuration: 0.2
 --- !u!114 &7093953700232513509
 MonoBehaviour:

@@ -35,6 +35,7 @@ public class ZombieAdvancedAI : MonoBehaviour
   [Range(0.0f, 10.0f)]
   public float chaseSpeed = 10f;
   public float attackDistance = 1.5f;
+  public float[] strikeDistances = {1.5f};
   public float attackCooldown = 2f;
   private float lastAttackTime;
   public float biteCooldown = 10f;
@@ -459,18 +460,22 @@ public class ZombieAdvancedAI : MonoBehaviour
         FaceTarget();
         PlayAudio(attackSound);
         animator.SetTrigger("Attack");
+        int attackIndex = 0;
         if (Random.value > 0.33)
         {
-          animator.SetInteger("AttackIndex", Random.Range(0, 4));
+          attackIndex = Random.Range(0, 4);
+          //animator.SetInteger("AttackIndex", Random.Range(0, 4));
         }
         else
         {
-          animator.SetInteger("AttackIndex", Random.Range(4, 7));
+          attackIndex = Random.Range(4, 7);
+          //animator.SetInteger("AttackIndex", Random.Range(4, 7));
         }
+        animator.SetInteger("AttackIndex", attackIndex);
 
         if (combatMagnetism != null)
         {
-          combatMagnetism.LungeAtTarget(player);
+          combatMagnetism.LungeAtTarget(player, attackIndex < strikeDistances.Length ? strikeDistances[attackIndex] : attackDistance);
         }
       }
 
