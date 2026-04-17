@@ -427,6 +427,9 @@ namespace StarterAssets
         _animator.SetFloat("MoveX", currentX);
         _animator.SetFloat("MoveZ", currentZ);
 
+        // Slow down based on stamina
+        _animator.speed = Mathf.Max(0.8f, survivalStats.currentStamina / survivalStats.maxStamina);
+
       }
     }
 
@@ -443,6 +446,9 @@ namespace StarterAssets
 
       // set target speed based on move speed, sprint speed and if sprint is pressed
       float targetSpeed = (_input.sprint && hasEnergyToSprint) ? SprintSpeed : MoveSpeed;
+
+      // Slow speed proportional to stamina
+      //targetSpeed *= Mathf.Max(0.2f, survivalStats.currentStamina / survivalStats.maxStamina);
 
       // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 

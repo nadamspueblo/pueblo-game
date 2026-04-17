@@ -85,7 +85,7 @@ public class SurvivalStats : MonoBehaviour
     // Stamina naturally regenerates over time if it isn't full
     if (currentStamina < maxStamina && Time.time >= nextStaminaRegenTime)
     {
-      currentStamina += staminaRegenRate * (currentHunger + currentSleep + currentThirst) / (maxHunger + maxSleep + maxThirst) * Time.deltaTime;
+      currentStamina += staminaRegenRate * (currentHunger + currentSleep + currentThirst) / (maxHunger + maxSleep + maxThirst) * (currentHealth / maxHealth) * Time.deltaTime;
       if (isExhausted && currentStamina >= 15f) // Adjust this 15f threshold however you like!
       {
         isExhausted = false;
@@ -102,12 +102,15 @@ public class SurvivalStats : MonoBehaviour
   {
     currentHealth -= attackController.isBlocking && UseStamina(attackController.blockStamina) ? 0.5f * amount : amount;
     currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-    onTakeDamage?.Invoke(amount, attackerTransform);
 
     if (currentHealth <= 0)
     {
       Debug.Log("Player has died!");
       onPlayerDeath?.Invoke();
+    }
+    else
+    {
+      onTakeDamage?.Invoke(amount, attackerTransform);
     }
     onStatsChanged?.Invoke();
   }

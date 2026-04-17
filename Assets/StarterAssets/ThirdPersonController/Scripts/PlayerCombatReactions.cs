@@ -18,6 +18,7 @@ public class PlayerCombatReactions : MonoBehaviour
     if (stats != null)
     {
       stats.onTakeDamage.AddListener(ReactToHit);
+      stats.onPlayerDeath.AddListener(DeathReaction);
     }
     if (thirdPersonController == null) thirdPersonController = GetComponent<ThirdPersonController>();
     thirdPersonController.onGrappleBreak.AddListener(BreakGrapple);
@@ -40,6 +41,11 @@ public class PlayerCombatReactions : MonoBehaviour
       isGrappled = true;
       StartCoroutine(HitPauseRoutine(duration));
     }
+  }
+
+  public void DeathReaction()
+  {
+    playerAnimator.SetTrigger("Death");
   }
 
   private void BreakGrapple()
