@@ -1912,15 +1912,56 @@ MonoBehaviour:
   walkSpeed: 4.13
   chaseSpeed: 6.45
   attackDistance: 2
-  strikeDistances:
-  - 1.5
+  attackMoveset:
+  - attackName: Light Attack R
+    animatorAttackIndex: 0
+    isMovingAttack: 1
+    strikeDistance: 1.5
+    baseDamage: 20
+    magnetismDistance: 1
+  - attackName: Light Attack L
+    animatorAttackIndex: 1
+    isMovingAttack: 1
+    strikeDistance: 1.5
+    baseDamage: 20
+    magnetismDistance: 1
+  - attackName: Big Slap R
+    animatorAttackIndex: 2
+    isMovingAttack: 1
+    strikeDistance: 2
+    baseDamage: 25
+    magnetismDistance: 1.4
+  - attackName: Big Slap L
+    animatorAttackIndex: 3
+    isMovingAttack: 1
+    strikeDistance: 2
+    baseDamage: 25
+    magnetismDistance: 1.4
+  - attackName: Punch R
+    animatorAttackIndex: 4
+    isMovingAttack: 1
+    strikeDistance: 1.2
+    baseDamage: 25
+    magnetismDistance: 0.8
+  - attackName: Punch L
+    animatorAttackIndex: 5
+    isMovingAttack: 1
+    strikeDistance: 1.2
+    baseDamage: 25
+    magnetismDistance: 0.8
+  - attackName: Punch R
+    animatorAttackIndex: 4
+    isMovingAttack: 1
+    strikeDistance: 1.2
+    baseDamage: 25
+    magnetismDistance: 0.8
   attackCooldown: 2
   biteCooldown: 10
+  combatMagnetism: {fileID: 5198206570699527643}
+  separationRadius: 0.7
+  separationForce: 2.5
   circlingRadius: 1.5
   maxCirclingTime: 1
-  combatMagnetism: {fileID: 5198206570699527643}
-  separationRadius: 0.8
-  separationForce: 2.5
   headBone: {fileID: 8237955497518305397}
   headLookSpeed: 5
   maxHeadTurnAngle: 80
