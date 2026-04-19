@@ -31,6 +31,13 @@ public class SurvivalStats : MonoBehaviour
   [Header("Component References")]
   public AttackController attackController;
 
+  [Header("Sound Effects")]
+  public AudioSource audioSource;
+  public AudioClip wakeUpSound;
+  public AudioClip outOfBreath;
+  public float audioCoolDown = 5f;
+  private float audioCoolDownTimer = 0f;
+
   [Header("Events")]
   // We will use these later to tell the UI Canvas to update its bars
   public UnityEvent onStatsChanged;
@@ -55,6 +62,11 @@ public class SurvivalStats : MonoBehaviour
   {
     HandlePassiveDrain();
     HandleStaminaRegen();
+
+    if (currentStamina / maxStamina < 0.5f && !audioSource.isPlaying)
+    {
+      PlayAudio(outOfBreath);
+    }
   }
 
   private void HandlePassiveDrain()
@@ -91,11 +103,29 @@ public class SurvivalStats : MonoBehaviour
         isExhausted = false;
         Debug.Log("Recovered from exhaustion!");
       }
+      //if (currentStamina / maxStamina >= 0.5f) StopAudio();
+
       currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
       onStatsChanged?.Invoke();
     }
   }
 
+  private void PlayAudio(AudioClip clip)
+  {
+    if (clip != null && audioSource != null) //
+    {
+      //audioSource.pitch = Random.Range(0.8f, 1.2f); //
+      audioSource.PlayOneShot(clip); //
+    }
+  }
+
+  private void StopAudio()
+  {
+    if (audioSource != null && audioSource.isPlaying)
+    {
+      audioSource.Stop();
+    }
+  }
   // --- PUBLIC METHODS FOR OTHER SCRIPTS TO USE ---
 
   public void TakeDamage(float amount, Transform attackerTransform)
@@ -164,5 +194,10 @@ public class SurvivalStats : MonoBehaviour
     // If they try to sprint while exhausted, keep resetting the penalty timer!
     nextStaminaRegenTime = Time.time + staminaRegenDelay;
     return false;
+  }
+
+  public void PlayWakeUpSound()
+  {
+    PlayAudio(wakeUpSound);
   }
 }

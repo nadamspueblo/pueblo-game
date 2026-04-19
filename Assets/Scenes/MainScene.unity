@@ -4588,7 +4588,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26e54e5a728a9234ab24fcf1460ed8a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentState: 0
+  currentState: 4
   MoveSpeed: 4
   SprintSpeed: 5.335
   SneakSpeed: 2
@@ -5379,6 +5379,10 @@ MonoBehaviour:
   exhaustionDelay: 3
   isExhausted: 0
   attackController: {fileID: 0}
+  audioSource: {fileID: 1048766682}
+  wakeUpSound: {fileID: 8300000, guid: 9b130798b1b1f4937be5bbebe0823c08, type: 3}
+  outOfBreath: {fileID: 8300000, guid: 0d9879afbf71e40dbb9e72d61ed5220a, type: 3}
+  audioCoolDown: 3
   onStatsChanged:
     m_PersistentCalls:
       m_Calls:
@@ -5468,6 +5472,17 @@ MonoBehaviour:
   attackController: {fileID: 6982812146354924990}
   stats: {fileID: 6982812146354924983}
   isGrappled: 0
+  audioSource: {fileID: 1048766682}
+  hitSounds:
+  - {fileID: 8300000, guid: 533eb084e91004ad5aadaa657cd7151f, type: 3}
+  - {fileID: 8300000, guid: 21c4ab875aa9e473ea4e991528cccc1f, type: 3}
+  - {fileID: 8300000, guid: 8eb1d125e75d149949e6344d13c8cee6, type: 3}
+  - {fileID: 8300000, guid: ad9c3be3218b04bd1ba0350849bf5407, type: 3}
+  blockSounds:
+  - {fileID: 8300000, guid: 1cce3816b2f4c46bbaa1f1cf637af5e0, type: 3}
+  - {fileID: 8300000, guid: cfddb5cb5539340a2970ad9473e7d3e9, type: 3}
+  - {fileID: 8300000, guid: c9a19e2d5732446efa3f9a37518ebef4, type: 3}
+  - {fileID: 8300000, guid: 77a7d7506f02142769e7a6dcd04870d8, type: 3}
 --- !u!114 &6982812146354924988
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5482,7 +5497,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatMagnetism
   magnetRadius: 3.5
   maxAngle: 45
-  optimalStrikeDistance: 1.5
+  optimalStrikeDistance: 1.7
   warpDuration: 0.15
   enemyLayer:
     serializedVersion: 2
@@ -5559,6 +5574,14 @@ MonoBehaviour:
   comboResetTime: 1.5
   isAttacking: 0
   isBlocking: 0
+  audioSource: {fileID: 1048766682}
+  attackAudioClips:
+  - {fileID: 8300000, guid: b0eddbe92b9c249b6a3e6913ea2dc163, type: 3}
+  - {fileID: 8300000, guid: 144ee9438b9364f969c0fc7064615c19, type: 3}
+  - {fileID: 8300000, guid: 2a1cfd41c98d1460d816233f23e6152f, type: 3}
+  - {fileID: 8300000, guid: 17eaccd8f692843cf9652d4cec294fe2, type: 3}
+  - {fileID: 8300000, guid: 962fed30cb2044e488376207e9cd60f3, type: 3}
+  - {fileID: 8300000, guid: 940905f8a21c145119b64f16e7131c47, type: 3}
   maxAttackDuration: 2.5
 --- !u!114 &6982812146354924991
 MonoBehaviour:
@@ -5577,6 +5600,7 @@ MonoBehaviour:
   staminaVolume: {fileID: 1506421442}
   healthEffectStart: 0.5
   staminaEffectStart: 0.5
+  wakeTime: 3
 --- !u!4 &6983258932136875375
 Transform:
   m_ObjectHideFlags: 0

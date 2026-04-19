@@ -56,6 +56,10 @@ public class AttackController : MonoBehaviour
   private AttackInputType bufferedInputType;
   public bool isBlocking = false;
 
+  [Header("Sound Effects")]
+  public AudioSource audioSource;
+  public AudioClip[] attackAudioClips;
+
   [Header("Safety Failsafes")]
   public float maxAttackDuration = 3.5f;
 
@@ -166,6 +170,8 @@ public class AttackController : MonoBehaviour
       playerAnimator.SetTrigger(matchedAttack.Value.animatorTrigger);
       if (combatMagnetism != null) combatMagnetism.TriggerMagnetism();
       currentComboStep++;
+      PlayAudio(attackAudioClips[Random.Range(0, attackAudioClips.Length)]);
+
     }
     else if (!matchedAttack.HasValue)
     {
@@ -210,5 +216,14 @@ public class AttackController : MonoBehaviour
   {
     currentComboStep = 0;
     targetTwist = 0f;
+  }
+
+  private void PlayAudio(AudioClip clip)
+  {
+    if (clip != null && audioSource != null) //
+    {
+      //audioSource.pitch = Random.Range(0.8f, 1.2f); //
+      audioSource.PlayOneShot(clip); //
+    }
   }
 }

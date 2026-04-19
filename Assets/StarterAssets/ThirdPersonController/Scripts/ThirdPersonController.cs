@@ -16,7 +16,8 @@ namespace StarterAssets
     FreeExplore,
     CombatStrafe,
     Sneak,
-    Grappled
+    Grappled,
+    Restricted
   }
 
   [RequireComponent(typeof(CharacterController))]
@@ -254,6 +255,8 @@ namespace StarterAssets
           GroundedCheck();
           GrappleCheck();
           break;
+        case PlayerMovementState.Restricted:
+          break;
       }
     }
 
@@ -262,7 +265,7 @@ namespace StarterAssets
       if (currentState == newState) return;
 
       // Prevents changing state until grapple is broken using SetState
-      if (currentState == PlayerMovementState.Grappled) return;
+      if (currentState == PlayerMovementState.Grappled || currentState == PlayerMovementState.Restricted) return;
 
       SetState(newState);
     }
