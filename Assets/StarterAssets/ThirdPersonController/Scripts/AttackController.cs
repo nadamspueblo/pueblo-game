@@ -74,6 +74,8 @@ public class AttackController : MonoBehaviour
 
   void Update()
   {
+    if (survivalStats.isDead) return;
+    
     if (isAttacking && (Time.time - lastAttackTime > maxAttackDuration))
     {
       Debug.LogWarning("Attack Animation Event missed! Forcing state reset.");
