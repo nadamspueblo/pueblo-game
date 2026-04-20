@@ -4,6 +4,8 @@ using StarterAssets;
 using UnityEngine;
 using UnityEngine.AI;
 
+public enum AttackSide { Any, Left, Right }
+
 [System.Serializable]
 public struct ZombieAttackDefinition
 {
@@ -14,9 +16,11 @@ public struct ZombieAttackDefinition
   public bool isMovingAttack; // True = use Upper Body mask and keep walking
 
   [Header("Combat Math")]
-  public float strikeDistance; // How close they need to be to trigger THIS specific attack
+  public float strikeDistance; // Ideal strike distance
   public float baseDamage; // How much damage it deals
-  public float magnetismDistance; // How far they slide during the lunge
+  public float magnetismDistance; // How close they need to be to trigger THIS specific attack. MUST be closer than the global zombie attackDistance
+  [Tooltip("Which side of the zombie must the player be on to trigger this?")]
+  public AttackSide preferredSide;
 }
 
 [RequireComponent(typeof(NavMeshAgent))]
@@ -463,80 +467,126 @@ public class ZombieAdvancedAI : MonoBehaviour
 
     if (distToPlayer <= attackDistance)
     {
-      //speed = 0.2f;//0.9f * chaseSpeed;
+      speed = walkSpeed;
       ChangeState(ZombieState.Attack);
     }
-    else if (distToPlayer > attackDistance)
+    else if (distToPlayer <= attackDistance * 1.5)
+    {
+      speed = chaseSpeed;
+      ChangeState(ZombieState.Circling);
+    }
+    else if (distToPlayer < viewDistance)
     {
       speed = chaseSpeed;
     }
-    else if (distToPlayer > viewDistance * 1.5f)
+    else if (distToPlayer < viewDistance * 1.5f)
     {
       investigationPoint = player.position;
       ChangeState(ZombieState.Investigate);
+    }
+    else
+    {
+      speed = walkSpeed;
+      ChangeState(ZombieState.Wander);
     }
   }
 
   private void UpdateAttackState()
   {
-    //agent.isStopped = true;
-    animator.speed = 1f;
+    float distToPlayer = Vector3.Distance(transform.position, player.position);
 
+    // Exit Combat if the player runs completely out of the global engagement zone
+    if (distToPlayer > attackDistance)
+    {
+        agent.isStopped = false;
+        ChangeState(ZombieState.Chase);
+        return;
+    }
+
+    // Always face the player while in the engagement zone
+    FaceTarget();
+
+    // Are we ready to swing?
     if (Time.time >= lastAttackTime + attackCooldown && !playerAttackController.isAttacking)
     {
-      // Attack variation
-      float value = Random.value;
-      if (value < 0.3)
-      {
-        // Walk around player
-        ChangeState(ZombieState.Circling);
-        return;
-      }
-      FaceTarget();
-      PlayAudio(attackSound);
-      // 1. Pick a random attack from our configured Inspector list
-      if (attackMoveset.Count > 0)
-      {
-        int randomIndex = Random.Range(0, attackMoveset.Count);
-        currentAttackDef = attackMoveset[randomIndex];
-        currentAttackDamage = currentAttackDef.baseDamage;
+        // 1. Ask the algorithm what attacks are currently valid
+        List<ZombieAttackDefinition> validOptions = GetValidAttacks(distToPlayer);
 
-        // 2. Route the animation based on the 'isMovingAttack' boolean!
-        if (currentAttackDef.isMovingAttack)
+        if (validOptions.Count > 0)
         {
-          // KEEP WALKING! Use the Upper Body Layer (Layer 1)
-          agent.isStopped = false;
-          animator.SetInteger("AttackIndex", currentAttackDef.animatorAttackIndex);
-          animator.SetTrigger("Attack"); // Assuming your Upper Body mask listens for this
+            // We have a valid attack! Pick a random one from the valid pool.
+            int randomIndex = Random.Range(0, validOptions.Count);
+            currentAttackDef = validOptions[randomIndex];
+            currentAttackDamage = currentAttackDef.baseDamage;
+
+            PlayAudio(attackSound);
+
+            // Execute Animation
+            if (currentAttackDef.isMovingAttack)
+            {
+                agent.isStopped = false;
+                animator.SetInteger("AttackIndex", currentAttackDef.animatorAttackIndex);
+                animator.SetTrigger("Attack"); 
+            }
+            else
+            {
+                agent.isStopped = true;
+                animator.SetInteger("AttackIndex", currentAttackDef.animatorAttackIndex);
+                animator.SetTrigger("Attack");
+            }
+
+            // Apply specific magnetism
+            if (combatMagnetism != null)
+            {
+                combatMagnetism.LungeAtTarget(player, currentAttackDef.strikeDistance);
+            }
+
+            lastAttackTime = Time.time;
         }
         else
         {
-          // PLANT FEET! Standard full-body attack
-          agent.isStopped = true;
-          animator.SetInteger("AttackIndex", currentAttackDef.animatorAttackIndex);
-          animator.SetTrigger("Attack");
+            // MICRO-CHASE: We are in the combat zone, but not close enough 
+            // for our specific attacks yet. Keep moving toward the player!
+            agent.isStopped = false;
+            agent.SetDestination(player.position);
         }
-
-        // 3. Apply the specific Magnetism
-        if (combatMagnetism != null)
-        {
-          combatMagnetism.LungeAtTarget(player, currentAttackDef.magnetismDistance);
-        }
-      }
-
-      lastAttackTime = Time.time;
     }
 
-
-    float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-    if (distanceToPlayer > attackDistance * 1.5)
+    if (distToPlayer > attackDistance * 1.5)
     {
       ChangeState(ZombieState.Chase);
     }
-    else if (distanceToPlayer > attackDistance)
+    else if (distToPlayer > attackDistance)
     {
       ChangeState(ZombieState.Circling);
     }
+  }
+
+  private List<ZombieAttackDefinition> GetValidAttacks(float currentDistance)
+  {
+    List<ZombieAttackDefinition> validAttacks = new List<ZombieAttackDefinition>();
+
+    // Calculate the angle to the player (-180 to 180)
+    // Negative = Player is to our Left. Positive = Player is to our Right.
+    Vector3 directionToPlayer = (player.position - transform.position).normalized;
+    float signedAngle = Vector3.SignedAngle(transform.forward, directionToPlayer, Vector3.up);
+
+    foreach (var attack in attackMoveset)
+    {
+      // 1. Check Distance: Is the player close enough for THIS specific attack?
+      if (currentDistance > attack.magnetismDistance) continue;
+
+      // 2. Check Direction: Is the player on the correct side?
+      // We use a 15-degree deadzone in the center so "Left" and "Right" attacks 
+      // don't feel too restrictive if the player is standing mostly in front.
+      if (attack.preferredSide == AttackSide.Left && signedAngle > 15f) continue;
+      if (attack.preferredSide == AttackSide.Right && signedAngle < -15f) continue;
+
+      // If it passes both checks, it's a valid option!
+      validAttacks.Add(attack);
+    }
+
+    return validAttacks;
   }
 
   private void UpdateCirclingState()

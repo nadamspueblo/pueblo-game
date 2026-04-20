@@ -1909,55 +1909,63 @@ MonoBehaviour:
   combatReactions: {fileID: 0}
   wanderRadius: 10
   wanderTimer: 5
-  walkSpeed: 4.13
-  chaseSpeed: 6.45
+  walkSpeed: 4
+  chaseSpeed: 7
   attackDistance: 2
   attackMoveset:
   - attackName: Light Attack R
     animatorAttackIndex: 0
     isMovingAttack: 1
-    strikeDistance: 1.5
+    strikeDistance: 1.1
     baseDamage: 20
-    magnetismDistance: 1
+    magnetismDistance: 1.5
+    preferredSide: 2
   - attackName: Light Attack L
     animatorAttackIndex: 1
     isMovingAttack: 1
-    strikeDistance: 1.5
+    strikeDistance: 1.1
     baseDamage: 20
-    magnetismDistance: 1
+    magnetismDistance: 1.5
+    preferredSide: 1
   - attackName: Big Slap R
     animatorAttackIndex: 2
     isMovingAttack: 1
-    strikeDistance: 2
+    strikeDistance: 1.4
     baseDamage: 25
-    magnetismDistance: 1.4
+    magnetismDistance: 1.9
+    preferredSide: 2
   - attackName: Big Slap L
     animatorAttackIndex: 3
     isMovingAttack: 1
-    strikeDistance: 2
+    strikeDistance: 1.4
     baseDamage: 25
-    magnetismDistance: 1.4
+    magnetismDistance: 1.9
+    preferredSide: 1
   - attackName: Punch R
     animatorAttackIndex: 4
     isMovingAttack: 1
-    strikeDistance: 1.2
+    strikeDistance: 0.8
     baseDamage: 25
-    magnetismDistance: 0.8
+    magnetismDistance: 1.2
+    preferredSide: 2
   - attackName: Punch L
     animatorAttackIndex: 5
     isMovingAttack: 1
-    strikeDistance: 1.2
+    strikeDistance: 0.8
     baseDamage: 25
-    magnetismDistance: 0.8
-  - attackName: Punch R
-    animatorAttackIndex: 4
+    magnetismDistance: 1.2
+    preferredSide: 1
+  - attackName: Arm Slam
+    animatorAttackIndex: 6
     isMovingAttack: 1
-    strikeDistance: 1.2
+    strikeDistance: 0.8
     baseDamage: 25
-    magnetismDistance: 0.8
+    magnetismDistance: 1.2
+    preferredSide: 0
   attackCooldown: 2
   biteCooldown: 10
   combatMagnetism: {fileID: 5198206570699527643}
+  currentAttackDamage: 10
   separationRadius: 0.7
   separationForce: 2.5
   circlingRadius: 1.5

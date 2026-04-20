@@ -5379,6 +5379,7 @@ MonoBehaviour:
   staminaRegenDelay: 1
   exhaustionDelay: 3
   isExhausted: 0
+  isDead: 0
   attackController: {fileID: 0}
   audioSource: {fileID: 1048766682}
   wakeUpSound: {fileID: 8300000, guid: 9b130798b1b1f4937be5bbebe0823c08, type: 3}
@@ -5484,6 +5485,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: cfddb5cb5539340a2970ad9473e7d3e9, type: 3}
   - {fileID: 8300000, guid: c9a19e2d5732446efa3f9a37518ebef4, type: 3}
   - {fileID: 8300000, guid: 77a7d7506f02142769e7a6dcd04870d8, type: 3}
+  deathSounds:
+  - {fileID: 8300000, guid: ec3d35bca4b2d4398af6add84f90b50d, type: 3}
+  - {fileID: 8300000, guid: 58677e030b54d416ebc29e34b5eb4541, type: 3}
+  - {fileID: 8300000, guid: 61c8f3bddefae4cd099cb7c3f4704062, type: 3}
 --- !u!114 &6982812146354924988
 MonoBehaviour:
   m_ObjectHideFlags: 0
