@@ -115,7 +115,7 @@ public class RagdollManager : MonoBehaviour
     }
     else
     {
-      animator.Play("Zombie Stand Up", 0, 0f);
+      animator.Play("ZStandupFaceDown", 0, 0f);
     }
 
     // THE TRICK: Force the Animator to instantly calculate Frame 0 right now

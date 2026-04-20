@@ -1,12 +1,33 @@
 using System.Collections;
+using System.Collections.Generic;
 using StarterAssets;
 using UnityEngine;
 using UnityEngine.AI;
+
+public enum AttackSide { Any, Left, Right }
+
+[System.Serializable]
+public struct ZombieAttackDefinition
+{
+  public string attackName; // e.g., "Right Hook", "Running Lunge"
+
+  [Header("Animation")]
+  public int animatorAttackIndex; // The int to send to the Animator
+  public bool isMovingAttack; // True = use Upper Body mask and keep walking
+
+  [Header("Combat Math")]
+  public float strikeDistance; // Ideal strike distance
+  public float baseDamage; // How much damage it deals
+  public float magnetismDistance; // How close they need to be to trigger THIS specific attack. MUST be closer than the global zombie attackDistance
+  [Tooltip("Which side of the zombie must the player be on to trigger this?")]
+  public AttackSide preferredSide;
+}
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class ZombieAdvancedAI : MonoBehaviour
 {
   public enum ZombieState { Wander, Investigate, Chase, Attack, Feeding, Scream, Unconscious, StandUp, Crawling, Circling, QuickBite, Dead }
+  public int movementStyle = 0;
 
   [Header("References")]
   public AttackController playerAttackController;
@@ -33,20 +54,25 @@ public class ZombieAdvancedAI : MonoBehaviour
   public float walkSpeed = 5f;
   [Range(0.0f, 10.0f)]
   public float chaseSpeed = 10f;
-  public float attackDistance = 1.5f;
+  public float attackDistance = 2.5f;
+  [Header("Attack Moveset")]
+  public List<ZombieAttackDefinition> attackMoveset = new List<ZombieAttackDefinition>();
+  private ZombieAttackDefinition currentAttackDef;
   public float attackCooldown = 2f;
   private float lastAttackTime;
   public float biteCooldown = 10f;
   private float lastBiteTime;
   private bool isGrappleBroken = false; // Breaks the bite grapple when true
-  public float circlingRadius = 2.3f;
-  public float maxCirclingTime = 3f; // How long they will try to circle before giving up
-  private float circlingTimer = 0f;
   public ZombieCombatMagnetism combatMagnetism;
+  [HideInInspector] public float currentAttackDamage = 10f;
 
   [Header("Crowd Control")]
   public float separationRadius = 0.8f; // How close they can get before pushing
   public float separationForce = 1.5f;
+  private int assignedSlot = -1; // For HordeManager
+  public float circlingRadius = 2.3f;
+  public float maxCirclingTime = 3f; // How long they will try to circle before giving up
+  private float circlingTimer = 0f;
 
   [Header("Head Tracking")]
   public Transform headBone; // Drag the Mixamo head/neck bone here
@@ -67,7 +93,7 @@ public class ZombieAdvancedAI : MonoBehaviour
   private float lastAlertTime = -5f;
   private bool hasAlerted = false;
   public AudioClip screamSound;
-  public AudioClip attackSound; // Renamed from attachSound for clarity
+  public AudioClip attackSound;
   public AudioClip[] idleGrowls;
 
   private float growlTimer = 0f;
@@ -99,6 +125,9 @@ public class ZombieAdvancedAI : MonoBehaviour
     // Randomly vary which animation frame the zombie starts at for variation
     AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
     animator.Play(state.fullPathHash, 0, Random.Range(0f, 1f));
+
+    // Set the movement style for the animator
+    animator.SetInteger("MovementStyle", movementStyle);
 
     // Collider references for ignoring physics
     allZombieColliders = GetComponentsInChildren<Collider>();
@@ -183,11 +212,11 @@ public class ZombieAdvancedAI : MonoBehaviour
       {
         if (currentState == ZombieState.Circling || currentState == ZombieState.Chase)
         {
-          ChangeState(ZombieState.QuickBite);
+          //ChangeState(ZombieState.QuickBite);
         }
         if (currentState == ZombieState.Attack && Random.value > 0.5f)
         {
-          ChangeState(ZombieState.QuickBite);
+          //ChangeState(ZombieState.QuickBite);
         }
         else
         {
@@ -205,7 +234,7 @@ public class ZombieAdvancedAI : MonoBehaviour
 
   private void CheckSenses()
   {
-    if (currentState == ZombieState.Attack || currentState == ZombieState.Unconscious || currentState == ZombieState.StandUp || currentState == ZombieState.Scream) return;
+    if (currentState == ZombieState.Attack || currentState == ZombieState.StandUp || currentState == ZombieState.Scream || currentState == ZombieState.Circling) return;
 
     float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
@@ -213,6 +242,12 @@ public class ZombieAdvancedAI : MonoBehaviour
     if (currentState == ZombieState.Unconscious && currentUnconsciousTimer <= 0f && distanceToPlayer <= 1.5f)
     {
       ChangeState(ZombieState.StandUp); // Animation event sets next state to Wander
+      return;
+    }
+
+    if (currentState == ZombieState.Feeding && distanceToPlayer <= 1.5f)
+    {
+      ChangeState(ZombieState.Wander);
       return;
     }
 
@@ -229,6 +264,11 @@ public class ZombieAdvancedAI : MonoBehaviour
     else
     {
       hasAlerted = false;
+    }
+
+    if (currentState == ZombieState.Unconscious || currentState == ZombieState.Feeding)
+    {
+      return;
     }
 
     // Standard Vision Check
@@ -290,6 +330,13 @@ public class ZombieAdvancedAI : MonoBehaviour
   private void ChangeState(ZombieState newState)
   {
     if (currentState == newState) return;
+
+    // If leaving the circling state, give slot back to the horde
+    if (currentState == ZombieState.Circling && newState != ZombieState.Circling)
+    {
+      HordeManager.Instance.ReleaseSlot(this);
+      assignedSlot = -1;
+    }
     SetState(newState);
   }
   private void SetState(ZombieState newState)
@@ -298,8 +345,13 @@ public class ZombieAdvancedAI : MonoBehaviour
 
     switch (newState)
     {
+      case ZombieState.Attack:
+        agent.isStopped = true;
+        //speed = 0f;
+        break;
       case ZombieState.Scream:
         agent.isStopped = true;
+        animator.SetBool("IsFeeding", false);
         animator.SetTrigger("Scream");
         break;
       case ZombieState.Unconscious:
@@ -325,8 +377,7 @@ public class ZombieAdvancedAI : MonoBehaviour
         break;
       case ZombieState.Circling:
         agent.isStopped = false;
-        speed = Random.Range(0.85f * chaseSpeed, 1.15f * chaseSpeed);
-        agent.SetDestination(GetCirclingPoint(2f, Random.value > 0.5f));
+        speed = Random.Range(0.85f * walkSpeed, 1.15f * walkSpeed);
         break;
       case ZombieState.QuickBite:
         animator.ResetTrigger("Attack");
@@ -335,9 +386,14 @@ public class ZombieAdvancedAI : MonoBehaviour
         {
           StartCoroutine(ExecuteGrappleAttack());
         }
+        else
+        {
+          ChangeState(ZombieState.Wander);
+        }
         break;
       case ZombieState.Wander:
       case ZombieState.Investigate:
+        animator.SetBool("IsFeeding", false);
         agent.isStopped = false;
         speed = Random.Range(0.85f * walkSpeed, 1.15f * walkSpeed);
         break;
@@ -411,93 +467,161 @@ public class ZombieAdvancedAI : MonoBehaviour
 
     if (distToPlayer <= attackDistance)
     {
+      speed = walkSpeed;
       ChangeState(ZombieState.Attack);
-      speed = 0.9f * chaseSpeed;
     }
-    else if (distToPlayer > attackDistance)
+    else if (distToPlayer <= attackDistance * 1.5)
+    {
+      speed = chaseSpeed;
+      ChangeState(ZombieState.Circling);
+    }
+    else if (distToPlayer < viewDistance)
     {
       speed = chaseSpeed;
     }
-    else if (distToPlayer > viewDistance * 1.5f)
+    else if (distToPlayer < viewDistance * 1.5f)
     {
       investigationPoint = player.position;
       ChangeState(ZombieState.Investigate);
+    }
+    else
+    {
+      speed = walkSpeed;
+      ChangeState(ZombieState.Wander);
     }
   }
 
   private void UpdateAttackState()
   {
-    agent.isStopped = true;
-    animator.speed = 1f;
+    float distToPlayer = Vector3.Distance(transform.position, player.position);
 
+    // Exit Combat if the player runs completely out of the global engagement zone
+    if (distToPlayer > attackDistance)
+    {
+        agent.isStopped = false;
+        ChangeState(ZombieState.Chase);
+        return;
+    }
+
+    // Always face the player while in the engagement zone
+    FaceTarget();
+
+    // Are we ready to swing?
     if (Time.time >= lastAttackTime + attackCooldown && !playerAttackController.isAttacking)
     {
-      // Attack variation
-      float value = Random.value;
-      if (value < 0.3)
-      {
-        // Walk around player
-        ChangeState(ZombieState.Circling);
-      }
-      else
-      {
-        FaceTarget();
-        PlayAudio(attackSound);
-        animator.SetTrigger("Attack");
-        if (Random.value > 0.33)
+        // 1. Ask the algorithm what attacks are currently valid
+        List<ZombieAttackDefinition> validOptions = GetValidAttacks(distToPlayer);
+
+        if (validOptions.Count > 0)
         {
-          animator.SetInteger("AttackIndex", Random.Range(0, 4));
+            // We have a valid attack! Pick a random one from the valid pool.
+            int randomIndex = Random.Range(0, validOptions.Count);
+            currentAttackDef = validOptions[randomIndex];
+            currentAttackDamage = currentAttackDef.baseDamage;
+
+            PlayAudio(attackSound);
+
+            // Execute Animation
+            if (currentAttackDef.isMovingAttack)
+            {
+                agent.isStopped = false;
+                animator.SetInteger("AttackIndex", currentAttackDef.animatorAttackIndex);
+                animator.SetTrigger("Attack"); 
+            }
+            else
+            {
+                agent.isStopped = true;
+                animator.SetInteger("AttackIndex", currentAttackDef.animatorAttackIndex);
+                animator.SetTrigger("Attack");
+            }
+
+            // Apply specific magnetism
+            if (combatMagnetism != null)
+            {
+                combatMagnetism.LungeAtTarget(player, currentAttackDef.strikeDistance);
+            }
+
+            lastAttackTime = Time.time;
         }
         else
         {
-          animator.SetInteger("AttackIndex", Random.Range(4, 7));
+            // MICRO-CHASE: We are in the combat zone, but not close enough 
+            // for our specific attacks yet. Keep moving toward the player!
+            agent.isStopped = false;
+            agent.SetDestination(player.position);
         }
-
-        if (combatMagnetism != null)
-        {
-          combatMagnetism.LungeAtTarget(player);
-        }
-      }
-
-      lastAttackTime = Time.time;
     }
 
-    if (Vector3.Distance(transform.position, player.position) > attackDistance)
+    if (distToPlayer > attackDistance * 1.5)
     {
-      agent.isStopped = false;
       ChangeState(ZombieState.Chase);
     }
+    else if (distToPlayer > attackDistance)
+    {
+      ChangeState(ZombieState.Circling);
+    }
+  }
+
+  private List<ZombieAttackDefinition> GetValidAttacks(float currentDistance)
+  {
+    List<ZombieAttackDefinition> validAttacks = new List<ZombieAttackDefinition>();
+
+    // Calculate the angle to the player (-180 to 180)
+    // Negative = Player is to our Left. Positive = Player is to our Right.
+    Vector3 directionToPlayer = (player.position - transform.position).normalized;
+    float signedAngle = Vector3.SignedAngle(transform.forward, directionToPlayer, Vector3.up);
+
+    foreach (var attack in attackMoveset)
+    {
+      // 1. Check Distance: Is the player close enough for THIS specific attack?
+      if (currentDistance > attack.magnetismDistance) continue;
+
+      // 2. Check Direction: Is the player on the correct side?
+      // We use a 15-degree deadzone in the center so "Left" and "Right" attacks 
+      // don't feel too restrictive if the player is standing mostly in front.
+      if (attack.preferredSide == AttackSide.Left && signedAngle > 15f) continue;
+      if (attack.preferredSide == AttackSide.Right && signedAngle < -15f) continue;
+
+      // If it passes both checks, it's a valid option!
+      validAttacks.Add(attack);
+    }
+
+    return validAttacks;
   }
 
   private void UpdateCirclingState()
   {
-    // 1. Keep staring at the player! 
-    // Since the agent is moving to a point beside the player, forcing them to 
-    // face the player creates a very creepy "strafing" or side-stepping look.
-    //FaceTarget(); 
-
     circlingTimer += Time.deltaTime;
-
-    float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
-    // We use Vector3.Distance to the destination instead of agent.remainingDistance 
-    // because remainingDistance can sometimes falsely report 0 on complex path corners.
-    float distanceToDestination = Vector3.Distance(transform.position, agent.destination);
-
-    // 2. Did the player run away while we were trying to circle them?
-    if (distanceToPlayer > circlingRadius * 1.5f)
+    // 1. Request a slot from the Manager
+    if (assignedSlot == -1)
     {
-      // Player broke the engagement ring. Go back to a full chase!
-      ChangeState(ZombieState.Chase);
-      return;
+      assignedSlot = HordeManager.Instance.RequestSlot(this);
     }
 
-    // 3. Have we arrived at the flanking spot? OR did we run out of time?
-    // (The timer prevents them from getting stuck if the NavMesh point is behind a barrel)
-    if (distanceToDestination <= attackDistance || circlingTimer >= maxCirclingTime)
+    // 2. Set our destination
+    if (assignedSlot != -1)
     {
-      // We are in position. Time to strike!
-      ChangeState(ZombieState.Attack);
+      // We got a slot! Move to the flanking position.
+      Vector3 targetPos = HordeManager.Instance.GetPositionForSlot(assignedSlot);
+      agent.SetDestination(targetPos);
+
+      // Have we arrived at our assigned flanking spot? OR did we run out of time?
+      float distanceToDestination = Vector3.Distance(transform.position, targetPos);
+      if (distanceToDestination <= 0.5f || circlingTimer >= maxCirclingTime)
+      {
+        ChangeState(ZombieState.Attack);
+      }
+    }
+    else
+    {
+      // Fallback: If all 8 slots are taken, just walk toward the player so we don't stand frozen
+      agent.SetDestination(player.position);
+    }
+
+    // 3. Did the player run away while we were trying to circle?
+    if (Vector3.Distance(transform.position, player.position) > circlingRadius * 2f)
+    {
+      ChangeState(ZombieState.Chase);
     }
   }
 
@@ -508,6 +632,8 @@ public class ZombieAdvancedAI : MonoBehaviour
   {
     // 1. Give the ragdoll 5 seconds to fall, bounce, and settle on the floor
     yield return new WaitForSeconds(3f);
+
+    HordeManager.Instance.ReleaseSlot(this);
 
     RootMotionAnimation rootMotion = GetComponent<RootMotionAnimation>();
     Destroy(rootMotion);
@@ -614,7 +740,7 @@ public class ZombieAdvancedAI : MonoBehaviour
       if (neighbor.gameObject == this.gameObject) continue;
 
       // 2. Is the thing in our bubble another zombie?
-      if (neighbor.CompareTag("Enemy"))
+      if (neighbor.CompareTag("Enemy") || neighbor.CompareTag("Player"))
       {
         // 3. Calculate the push away
         Vector3 pushDirection = transform.position - neighbor.transform.position;
@@ -820,7 +946,7 @@ public class ZombieAdvancedAI : MonoBehaviour
   // TODO: Call in the Scream animation when the mouth opens
   public void Event_TriggerScreamAndNoiseMaker()
   {
-    PlayAudio(screamSound); // From your helper method
+    PlayAudio(screamSound);
     if (noiseMaker != null)
     {
       noiseMaker.MakeNoise(alertScreamRadius); // Wakes up other zombies!
