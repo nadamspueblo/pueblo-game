@@ -27,6 +27,7 @@ public class SurvivalStats : MonoBehaviour
   public float staminaRegenDelay = 1.0f; // Wait 1 second after running before regening
   public float exhaustionDelay = 3.0f;   // Wait 3 seconds if the bar hits absolute zero!
   public bool isExhausted = false;
+  public bool isDead = false;
 
   [Header("Component References")]
   public AttackController attackController;
@@ -60,10 +61,11 @@ public class SurvivalStats : MonoBehaviour
 
   void Update()
   {
+    if (isDead) return;
     HandlePassiveDrain();
     HandleStaminaRegen();
 
-    if (currentStamina / maxStamina < 0.5f && !audioSource.isPlaying)
+    if (currentStamina / maxStamina < 0.38f && !audioSource.isPlaying)
     {
       PlayAudio(outOfBreath);
     }
@@ -130,12 +132,14 @@ public class SurvivalStats : MonoBehaviour
 
   public void TakeDamage(float amount, Transform attackerTransform)
   {
+    if (isDead) return;
     currentHealth -= attackController.isBlocking && UseStamina(attackController.blockStamina) ? 0.5f * amount : amount;
     currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
     if (currentHealth <= 0)
     {
       Debug.Log("Player has died!");
+      isDead = true;
       onPlayerDeath?.Invoke();
     }
     else
@@ -148,6 +152,7 @@ public class SurvivalStats : MonoBehaviour
   // Use this when eating food, drinking water, or sleeping
   public void RestoreStat(string statName, float amount)
   {
+    if (isDead) return;
     switch (statName.ToLower())
     {
       case "health":
@@ -169,7 +174,7 @@ public class SurvivalStats : MonoBehaviour
   // A special boolean method for stamina. It returns TRUE if you had enough energy, and FALSE if you are too tired.
   public bool UseStamina(float amount)
   {
-    if (isExhausted) return false;
+    if (isExhausted || isDead) return false;
 
     if (currentStamina >= amount)
     {

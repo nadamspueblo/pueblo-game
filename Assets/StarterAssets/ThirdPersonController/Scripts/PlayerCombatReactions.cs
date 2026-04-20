@@ -16,6 +16,7 @@ public class PlayerCombatReactions : MonoBehaviour
   public AudioSource audioSource;
   public AudioClip[] hitSounds;
   public AudioClip[] blockSounds;
+  public AudioClip[] deathSounds;
 
 
   void Start()
@@ -52,6 +53,8 @@ public class PlayerCombatReactions : MonoBehaviour
   public void DeathReaction()
   {
     playerAnimator.SetTrigger("Death");
+    StopAudio();
+    PlayAudio(deathSounds[Random.Range(0, deathSounds.Length)]);
   }
 
   private void BreakGrapple()
@@ -140,6 +143,13 @@ public class PlayerCombatReactions : MonoBehaviour
     {
       //audioSource.pitch = Random.Range(0.8f, 1.2f); //
       audioSource.PlayOneShot(clip); //
+    }
+  }
+  private void StopAudio()
+  {
+    if (audioSource != null && audioSource.isPlaying)
+    {
+      audioSource.Stop();
     }
   }
 }

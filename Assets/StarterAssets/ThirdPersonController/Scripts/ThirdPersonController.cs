@@ -230,6 +230,7 @@ namespace StarterAssets
 
     private void Update()
     {
+      if (survivalStats.isDead) return;
       _hasAnimator = TryGetComponent(out _animator);
 
       switch (currentState)
