@@ -1893,6 +1893,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09c81c5571e1db442931a6b10b3b635a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieAdvancedAI
+  movementStyle: 1
+  playerAttackController: {fileID: 0}
   currentState: 6
   viewDistance: 15
   fieldOfView: 90
@@ -1907,16 +1909,67 @@ MonoBehaviour:
   combatReactions: {fileID: 0}
   wanderRadius: 10
   wanderTimer: 5
-  walkSpeed: 5
-  chaseSpeed: 10
-  attackDistance: 1.5
+  walkSpeed: 4
+  chaseSpeed: 7
+  attackDistance: 2
+  attackMoveset:
+  - attackName: Light Attack R
+    animatorAttackIndex: 0
+    isMovingAttack: 1
+    strikeDistance: 1.1
+    baseDamage: 20
+    magnetismDistance: 1.5
+    preferredSide: 2
+  - attackName: Light Attack L
+    animatorAttackIndex: 1
+    isMovingAttack: 1
+    strikeDistance: 1.1
+    baseDamage: 20
+    magnetismDistance: 1.5
+    preferredSide: 1
+  - attackName: Big Slap R
+    animatorAttackIndex: 2
+    isMovingAttack: 1
+    strikeDistance: 1.4
+    baseDamage: 25
+    magnetismDistance: 1.9
+    preferredSide: 2
+  - attackName: Big Slap L
+    animatorAttackIndex: 3
+    isMovingAttack: 1
+    strikeDistance: 1.4
+    baseDamage: 25
+    magnetismDistance: 1.9
+    preferredSide: 1
+  - attackName: Punch R
+    animatorAttackIndex: 4
+    isMovingAttack: 1
+    strikeDistance: 0.8
+    baseDamage: 25
+    magnetismDistance: 1.2
+    preferredSide: 2
+  - attackName: Punch L
+    animatorAttackIndex: 5
+    isMovingAttack: 1
+    strikeDistance: 0.8
+    baseDamage: 25
+    magnetismDistance: 1.2
+    preferredSide: 1
+  - attackName: Arm Slam
+    animatorAttackIndex: 6
+    isMovingAttack: 1
+    strikeDistance: 0.8
+    baseDamage: 25
+    magnetismDistance: 1.2
+    preferredSide: 0
   attackCooldown: 2
   biteCooldown: 10
+  combatMagnetism: {fileID: 5198206570699527643}
+  currentAttackDamage: 10
+  separationRadius: 0.7
+  separationForce: 2.5
   circlingRadius: 1.5
   maxCirclingTime: 1
-  combatMagnetism: {fileID: 5198206570699527643}
-  separationRadius: 0.8
-  separationForce: 2.5
   headBone: {fileID: 8237955497518305397}
   headLookSpeed: 5
   maxHeadTurnAngle: 80
@@ -1986,7 +2039,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36625047a6a88ba46902efdb3f6ea5ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieCombatMagnetism
-  optimalStrikeDistance: 0.9
+  optimalStrikeDistance: 1.5
   warpDuration: 0.2
 --- !u!114 &7093953700232513509
 MonoBehaviour:
