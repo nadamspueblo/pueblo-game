@@ -35,6 +35,15 @@ public class WeaponHitbox : MonoBehaviour
     DisableHitbox();
     PlayImpactSound();
 
+    float finalDamage = damageAmount; // Default to the inspector value (for player weapons)
+
+    // Ask the root object if it is a zombie. If it is, read the dynamic attack damage!
+    ZombieAdvancedAI parentZombie = transform.root.GetComponent<ZombieAdvancedAI>();
+    if (parentZombie != null)
+    {
+        finalDamage = parentZombie.currentAttackDamage;
+    }
+
     // 2. Check if the thing we hit has health
     if (other.CompareTag("Player"))
     {
@@ -42,7 +51,7 @@ public class WeaponHitbox : MonoBehaviour
 
       if (playerStats != null)
       {
-        playerStats.TakeDamage(damageAmount, transform.root);
+        playerStats.TakeDamage(finalDamage, transform.root);
       }
     }
     else
@@ -51,7 +60,7 @@ public class WeaponHitbox : MonoBehaviour
       Debug.Log(hitPart);
       if (hitPart != null)
       {
-        hitPart.HitByWeapon(damageAmount, transform, transform.root);
+        hitPart.HitByWeapon(finalDamage, transform, transform.root);
       }
     }
   }

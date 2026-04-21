@@ -27,9 +27,17 @@ public class SurvivalStats : MonoBehaviour
   public float staminaRegenDelay = 1.0f; // Wait 1 second after running before regening
   public float exhaustionDelay = 3.0f;   // Wait 3 seconds if the bar hits absolute zero!
   public bool isExhausted = false;
+  public bool isDead = false;
 
   [Header("Component References")]
   public AttackController attackController;
+
+  [Header("Sound Effects")]
+  public AudioSource audioSource;
+  public AudioClip wakeUpSound;
+  public AudioClip outOfBreath;
+  public float audioCoolDown = 5f;
+  private float audioCoolDownTimer = 0f;
 
   [Header("Events")]
   // We will use these later to tell the UI Canvas to update its bars
@@ -53,8 +61,14 @@ public class SurvivalStats : MonoBehaviour
 
   void Update()
   {
+    if (isDead) return;
     HandlePassiveDrain();
     HandleStaminaRegen();
+
+    if (currentStamina / maxStamina < 0.38f && !audioSource.isPlaying)
+    {
+      PlayAudio(outOfBreath);
+    }
   }
 
   private void HandlePassiveDrain()
@@ -85,29 +99,52 @@ public class SurvivalStats : MonoBehaviour
     // Stamina naturally regenerates over time if it isn't full
     if (currentStamina < maxStamina && Time.time >= nextStaminaRegenTime)
     {
-      currentStamina += staminaRegenRate * (currentHunger + currentSleep + currentThirst) / (maxHunger + maxSleep + maxThirst) * Time.deltaTime;
+      currentStamina += staminaRegenRate * (currentHunger + currentSleep + currentThirst) / (maxHunger + maxSleep + maxThirst) * (currentHealth / maxHealth) * Time.deltaTime;
       if (isExhausted && currentStamina >= 15f) // Adjust this 15f threshold however you like!
       {
         isExhausted = false;
         Debug.Log("Recovered from exhaustion!");
       }
+      //if (currentStamina / maxStamina >= 0.5f) StopAudio();
+
       currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
       onStatsChanged?.Invoke();
     }
   }
 
+  private void PlayAudio(AudioClip clip)
+  {
+    if (clip != null && audioSource != null) //
+    {
+      //audioSource.pitch = Random.Range(0.8f, 1.2f); //
+      audioSource.PlayOneShot(clip); //
+    }
+  }
+
+  private void StopAudio()
+  {
+    if (audioSource != null && audioSource.isPlaying)
+    {
+      audioSource.Stop();
+    }
+  }
   // --- PUBLIC METHODS FOR OTHER SCRIPTS TO USE ---
 
   public void TakeDamage(float amount, Transform attackerTransform)
   {
+    if (isDead) return;
     currentHealth -= attackController.isBlocking && UseStamina(attackController.blockStamina) ? 0.5f * amount : amount;
     currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-    onTakeDamage?.Invoke(amount, attackerTransform);
 
     if (currentHealth <= 0)
     {
       Debug.Log("Player has died!");
+      isDead = true;
       onPlayerDeath?.Invoke();
+    }
+    else
+    {
+      onTakeDamage?.Invoke(amount, attackerTransform);
     }
     onStatsChanged?.Invoke();
   }
@@ -115,6 +152,7 @@ public class SurvivalStats : MonoBehaviour
   // Use this when eating food, drinking water, or sleeping
   public void RestoreStat(string statName, float amount)
   {
+    if (isDead) return;
     switch (statName.ToLower())
     {
       case "health":
@@ -136,7 +174,7 @@ public class SurvivalStats : MonoBehaviour
   // A special boolean method for stamina. It returns TRUE if you had enough energy, and FALSE if you are too tired.
   public bool UseStamina(float amount)
   {
-    if (isExhausted) return false;
+    if (isExhausted || isDead) return false;
 
     if (currentStamina >= amount)
     {
@@ -161,5 +199,10 @@ public class SurvivalStats : MonoBehaviour
     // If they try to sprint while exhausted, keep resetting the penalty timer!
     nextStaminaRegenTime = Time.time + staminaRegenDelay;
     return false;
+  }
+
+  public void PlayWakeUpSound()
+  {
+    PlayAudio(wakeUpSound);
   }
 }

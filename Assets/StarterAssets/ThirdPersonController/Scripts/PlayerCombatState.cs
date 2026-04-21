@@ -13,6 +13,7 @@ public class PlayerCombatState : MonoBehaviour
 
   [Header("The Single Source of Truth")]
   public CombatStance currentStance = CombatStance.Standard;
+  private CombatStance prevStance = CombatStance.Standard;
   public WeaponType currentWeaponType = WeaponType.Unarmed;
 
   void Start()
@@ -41,13 +42,13 @@ public class PlayerCombatState : MonoBehaviour
         currentStance = (currentStance == CombatStance.Sneak) ? 
                         (input.aim ? CombatStance.Combat : CombatStance.Standard) : 
                         CombatStance.Sneak;
+        prevStance = currentStance;
         input.crouch = false; 
     }
-    // If we aren't locked in a crouch, constantly evaluate the aim button
-    else if (currentStance != CombatStance.Sneak)
-    {
-        currentStance = input.aim ? CombatStance.Combat : CombatStance.Standard;
-    }
+    // Toggle combat mode
+    currentStance = input.aim ? CombatStance.Combat : prevStance;
+    prevStance = currentStance == CombatStance.Combat ? CombatStance.Standard : prevStance;
+    
 
     // Make sure we're in the right movement state
     // Remember: ChangeState only changes if it's a new state

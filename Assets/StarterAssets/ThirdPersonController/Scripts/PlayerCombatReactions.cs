@@ -12,12 +12,20 @@ public class PlayerCombatReactions : MonoBehaviour
   private ZombieAdvancedAI attackingZombie;
   public bool isGrappled = false;
 
+  [Header("Sound Effects")]
+  public AudioSource audioSource;
+  public AudioClip[] hitSounds;
+  public AudioClip[] blockSounds;
+  public AudioClip[] deathSounds;
+
+
   void Start()
   {
     // Tune the radio! When SurvivalStats broadcasts a hit, run our ReactToHit function.
     if (stats != null)
     {
       stats.onTakeDamage.AddListener(ReactToHit);
+      stats.onPlayerDeath.AddListener(DeathReaction);
     }
     if (thirdPersonController == null) thirdPersonController = GetComponent<ThirdPersonController>();
     thirdPersonController.onGrappleBreak.AddListener(BreakGrapple);
@@ -40,6 +48,13 @@ public class PlayerCombatReactions : MonoBehaviour
       isGrappled = true;
       StartCoroutine(HitPauseRoutine(duration));
     }
+  }
+
+  public void DeathReaction()
+  {
+    playerAnimator.SetTrigger("Death");
+    StopAudio();
+    PlayAudio(deathSounds[Random.Range(0, deathSounds.Length)]);
   }
 
   private void BreakGrapple()
@@ -81,11 +96,13 @@ public class PlayerCombatReactions : MonoBehaviour
       {
         playerAnimator.SetTrigger("Hit"); // Triggers the Upper Body block flinch
         stats.UseStamina(attackController.blockStamina);
+        PlayAudio(blockSounds[Random.Range(0, blockSounds.Length)]);
         return; // Stop here so we don't play the full body stagger!
       }
     }
 
     // 4. We got hit! Send the math to the Animator for the Full Body override
+    PlayAudio(hitSounds[Random.Range(0, hitSounds.Length)]);
     playerAnimator.SetFloat("HitX", hitX);
     playerAnimator.SetFloat("HitZ", hitZ);
     playerAnimator.SetTrigger("Hit");
@@ -118,5 +135,21 @@ public class PlayerCombatReactions : MonoBehaviour
     // Return to normal time
     Time.timeScale = 1f;
     Time.fixedDeltaTime = 0.02f;
+  }
+
+  private void PlayAudio(AudioClip clip)
+  {
+    if (clip != null && audioSource != null) //
+    {
+      //audioSource.pitch = Random.Range(0.8f, 1.2f); //
+      audioSource.PlayOneShot(clip); //
+    }
+  }
+  private void StopAudio()
+  {
+    if (audioSource != null && audioSource.isPlaying)
+    {
+      audioSource.Stop();
+    }
   }
 }

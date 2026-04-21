@@ -16,7 +16,8 @@ namespace StarterAssets
     FreeExplore,
     CombatStrafe,
     Sneak,
-    Grappled
+    Grappled,
+    Restricted
   }
 
   [RequireComponent(typeof(CharacterController))]
@@ -229,6 +230,7 @@ namespace StarterAssets
 
     private void Update()
     {
+      if (survivalStats.isDead) return;
       _hasAnimator = TryGetComponent(out _animator);
 
       switch (currentState)
@@ -254,6 +256,8 @@ namespace StarterAssets
           GroundedCheck();
           GrappleCheck();
           break;
+        case PlayerMovementState.Restricted:
+          break;
       }
     }
 
@@ -262,7 +266,7 @@ namespace StarterAssets
       if (currentState == newState) return;
 
       // Prevents changing state until grapple is broken using SetState
-      if (currentState == PlayerMovementState.Grappled) return;
+      if (currentState == PlayerMovementState.Grappled || currentState == PlayerMovementState.Restricted) return;
 
       SetState(newState);
     }
@@ -427,6 +431,9 @@ namespace StarterAssets
         _animator.SetFloat("MoveX", currentX);
         _animator.SetFloat("MoveZ", currentZ);
 
+        // Slow down based on stamina
+        _animator.speed = Mathf.Max(0.8f, survivalStats.currentStamina / survivalStats.maxStamina);
+
       }
     }
 
@@ -443,6 +450,9 @@ namespace StarterAssets
 
       // set target speed based on move speed, sprint speed and if sprint is pressed
       float targetSpeed = (_input.sprint && hasEnergyToSprint) ? SprintSpeed : MoveSpeed;
+
+      // Slow speed proportional to stamina
+      //targetSpeed *= Mathf.Max(0.2f, survivalStats.currentStamina / survivalStats.maxStamina);
 
       // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
