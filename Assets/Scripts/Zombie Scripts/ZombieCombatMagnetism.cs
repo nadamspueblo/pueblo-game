@@ -12,6 +12,7 @@ public class ZombieCombatMagnetism : MonoBehaviour
 
   private NavMeshAgent agent;
   private bool isWarping = false;
+  private Coroutine activeMagnetismRoutine;
 
   void Start()
   {
@@ -23,12 +24,23 @@ public class ZombieCombatMagnetism : MonoBehaviour
   {
     if (!isWarping && target != null && gameObject.activeInHierarchy)
     {
-      StartCoroutine(WarpToTarget(target, optimalStrikeDistance < 0 ? this.optimalStrikeDistance : optimalStrikeDistance));
+      CancelMagnetism(); 
+      activeMagnetismRoutine = StartCoroutine(WarpToTarget(target, optimalStrikeDistance < 0 ? this.optimalStrikeDistance : optimalStrikeDistance));
     }
+  }
+
+  public void CancelMagnetism()
+  {
+    if (activeMagnetismRoutine != null)
+        {
+            StopCoroutine(activeMagnetismRoutine);
+            activeMagnetismRoutine = null;
+        }
   }
 
   private IEnumerator WarpToTarget(Transform target, float optimalStrikeDistance)
   {
+    if (target == null) yield break;
     isWarping = true;
     Vector3 startPos = transform.position;
 
@@ -59,6 +71,7 @@ public class ZombieCombatMagnetism : MonoBehaviour
 
     while (elapsedTime < warpDuration)
     {
+      if (target == null) break;
       elapsedTime += Time.deltaTime;
       float percentComplete = elapsedTime / warpDuration;
       float smoothPercent = Mathf.SmoothStep(0f, 1f, percentComplete);

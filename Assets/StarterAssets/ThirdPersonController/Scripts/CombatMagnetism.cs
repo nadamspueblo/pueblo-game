@@ -65,6 +65,7 @@ public class CombatMagnetism : MonoBehaviour
 
   private IEnumerator WarpToTarget(Transform target)
   {
+    if (target == null || characterController == null || !characterController.enabled) yield break;
     Vector3 startPos = transform.position;
 
     // Calculate exactly where we need to stand
@@ -83,6 +84,7 @@ public class CombatMagnetism : MonoBehaviour
 
     while (elapsedTime < warpDuration)
     {
+      if (target == null) break;
       elapsedTime += Time.deltaTime;
 
       // Calculate a percentage (0.0 to 1.0) for our Lerp

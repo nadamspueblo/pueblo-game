@@ -357,6 +357,8 @@ public class ZombieAdvancedAI : MonoBehaviour
       case ZombieState.Unconscious:
         agent.isStopped = true;
         currentUnconsciousTimer = minimumUnconsciousTime;
+        // SHUT DOWN BACKGROUND COMBAT LOOPS
+        if (combatMagnetism != null) combatMagnetism.CancelMagnetism();
         ragdollManager.EnableRagdoll();
         break;
       case ZombieState.StandUp:
@@ -398,6 +400,8 @@ public class ZombieAdvancedAI : MonoBehaviour
         speed = Random.Range(0.85f * walkSpeed, 1.15f * walkSpeed);
         break;
       case ZombieState.Dead:
+        // SHUT DOWN BACKGROUND COMBAT LOOPS
+        if (combatMagnetism != null) combatMagnetism.CancelMagnetism();
         StartCoroutine(TurnIntoStaticCorpse());
         break;
     }
@@ -635,51 +639,51 @@ public class ZombieAdvancedAI : MonoBehaviour
 
     HordeManager.Instance.ReleaseSlot(this);
 
+    // 1. SAFELY POWER DOWN THE COMPONENTS FIRST
+    Animator animator = GetComponentInChildren<Animator>();
+    if (animator != null) animator.enabled = false;
+
+    NavMeshAgent agent = GetComponent<NavMeshAgent>();
+    if (agent != null) agent.enabled = false;
+
     RootMotionAnimation rootMotion = GetComponent<RootMotionAnimation>();
-    Destroy(rootMotion);
+    if (rootMotion != null) rootMotion.enabled = false;
 
-    // 2. STRIP JOINTS (CRITICAL ORDER)
-    // The Unity Ragdoll Wizard uses CharacterJoints to connect the bones. 
-    // You MUST destroy joints before rigidbodies, or Unity will throw severe console errors!
-    CharacterJoint[] joints = GetComponentsInChildren<CharacterJoint>();
-    foreach (CharacterJoint joint in joints)
-    {
-      Destroy(joint);
-    }
-
-    // 3. STRIP RIGIDBODIES
-    // This completely removes the corpse from the PhysX engine's calculations.
-    Rigidbody[] rigidbodies = GetComponentsInChildren<Rigidbody>();
-    foreach (Rigidbody rb in rigidbodies)
-    {
-      Destroy(rb);
-    }
-
-    // 4. STRIP COLLIDERS
-    // Removes the hitboxes so the player and other zombies can walk right over the body.
     Collider[] colliders = GetComponentsInChildren<Collider>();
     foreach (Collider col in colliders)
     {
-      Destroy(col);
+      col.enabled = false;
     }
 
-    // 5. STRIP HEAVY COMPONENTS
-    // Delete the Animator and NavMeshAgent to free up CPU memory
-    Animator animator = GetComponentInChildren<Animator>();
-    if (animator != null) Destroy(animator);
+    Rigidbody[] rigidbodies = GetComponentsInChildren<Rigidbody>();
+    foreach (Rigidbody rb in rigidbodies)
+    {
+      rb.isKinematic = true; // Stop physics calculations instantly
+      rb.detectCollisions = false;
+    }
 
+    // 2. THE CRITICAL STEP: Wait one full frame!
+    // This gives the C++ Jobs System time to see that the components are disabled,
+    // so it cleanly shuts down its background threads.
+    yield return null; 
+
+    // 3. NOW it is safe to rip them out of memory!
+    if (rootMotion != null) Destroy(rootMotion);
+
+    CharacterJoint[] joints = GetComponentsInChildren<CharacterJoint>();
+    foreach (CharacterJoint joint in joints) Destroy(joint);
+
+    foreach (Rigidbody rb in rigidbodies) Destroy(rb);
+    foreach (Collider col in colliders) Destroy(col);
+
+    if (animator != null) Destroy(animator);
+    
     RagdollManager ragdoll = GetComponent<RagdollManager>();
     if (ragdoll != null) Destroy(ragdoll);
 
-    // Optional: Destroy the health manager or any other custom scripts here
-    // HealthManager health = GetComponent<HealthManager>();
-    // if (health != null) Destroy(health);
-
-    // 6. FINALLY: Destroy this exact AI script so it never runs Update() again
-    Destroy(this);
-
-    NavMeshAgent agent = GetComponent<NavMeshAgent>();
     if (agent != null) Destroy(agent);
+
+    Destroy(this);
   }
 
   // Sinks zombie corpse into the floor after 10 seconds
@@ -769,6 +773,7 @@ public class ZombieAdvancedAI : MonoBehaviour
 
     while (slideTimer < 0.15f)
     {
+      if (currentState == ZombieState.Dead || currentState == ZombieState.Unconscious) break;
       slideTimer += Time.deltaTime;
       float percent = slideTimer / 0.15f;
 
@@ -782,6 +787,8 @@ public class ZombieAdvancedAI : MonoBehaviour
       yield return null;
     }
 
+    if (currentState == ZombieState.Dead || currentState == ZombieState.Unconscious) yield break;
+
     // 3. We are in position. Play the animation!
     isGrappleBroken = false;
     animator.SetTrigger("NeckBite");
@@ -794,6 +801,7 @@ public class ZombieAdvancedAI : MonoBehaviour
     // Instead of WaitForSeconds, we run a loop every frame while the animation plays
     while (biteTimer < biteDuration)
     {
+      if (currentState == ZombieState.Dead || currentState == ZombieState.Unconscious) break;
       // Start the players reaction after the attack has already begun
       if (combatReactions != null && !hasTriggeredReaction)
       {
