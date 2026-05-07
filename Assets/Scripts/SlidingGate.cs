@@ -13,6 +13,7 @@ public class SlidingGate : MonoBehaviour
     [Header("Gate State")]
     public bool isOpen = false;
     public bool isMoving = false;
+    public bool isLocked = true; // Gate starts locked
     
     [Header("Interaction")]
     public KeyCode interactionKey = KeyCode.E;
@@ -60,16 +61,21 @@ public class SlidingGate : MonoBehaviour
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
         playerInRange = distanceToPlayer <= interactionRange;
         
-        // Handle input when player is in range
-        if (playerInRange && Input.GetKeyDown(interactionKey) && !isMoving)
+        // Only allow interaction if gate is unlocked
+        if (playerInRange && Input.GetKeyDown(interactionKey) && !isMoving && !isLocked)
         {
             ToggleGate();
+        }
+        // Inform player if gate is locked
+        else if (playerInRange && Input.GetKeyDown(interactionKey) && isLocked)
+        {
+            Debug.Log("Gate is locked! Break the chain to unlock it.");
         }
     }
     
     public void ToggleGate()
     {
-        if (isMoving) return; // Prevent multiple activations
+        if (isMoving || isLocked) return; // Prevent opening if locked
         
         if (isOpen)
         {
@@ -83,7 +89,7 @@ public class SlidingGate : MonoBehaviour
     
     public void OpenGate()
     {
-        if (isMoving || isOpen) return;
+        if (isMoving || isOpen || isLocked) return; // Check locked state
         
         StartCoroutine(SlideGate(openPosition, true));
     }
@@ -93,6 +99,17 @@ public class SlidingGate : MonoBehaviour
         if (isMoving || !isOpen) return;
         
         StartCoroutine(SlideGate(closedPosition, false));
+    }
+    
+    // Method called by BreakableChain when chain is destroyed
+    public void UnlockGate()
+    {
+        isLocked = false;
+        Debug.Log("Gate unlocked! You can now open it.");
+        
+        // Optional: Automatically open the gate when unlocked
+        // Uncomment the line below if you want the gate to open immediately
+        // OpenGate();
     }
     
     System.Collections.IEnumerator SlideGate(Vector3 targetPosition, bool opening)
@@ -161,8 +178,19 @@ public class SlidingGate : MonoBehaviour
             
             if (screenPos.z > 0) // Only show if in front of camera
             {
-                string prompt = isOpen ? $"Close ({interactionKey})" : $"Open ({interactionKey})";
-                GUI.Label(new Rect(screenPos.x - 50, Screen.height - screenPos.y, 100, 20), prompt);
+                string prompt;
+                
+                // Show different prompts based on locked state
+                if (isLocked)
+                {
+                    prompt = "LOCKED - Break the chain";
+                }
+                else
+                {
+                    prompt = isOpen ? $"Close ({interactionKey})" : $"Open ({interactionKey})";
+                }
+                
+                GUI.Label(new Rect(screenPos.x - 75, Screen.height - screenPos.y, 150, 20), prompt);
             }
         }
     }

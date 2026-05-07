@@ -29,9 +29,9 @@ public class WeaponHitbox : MonoBehaviour
 
   void OnTriggerEnter(Collider other)
   {
-
     // 1. Make sure we don't accidentally hit ourselves
     if (other.transform.root == transform.root) return;
+    
     DisableHitbox();
     PlayImpactSound();
 
@@ -42,6 +42,14 @@ public class WeaponHitbox : MonoBehaviour
     if (parentZombie != null)
     {
         finalDamage = parentZombie.currentAttackDamage;
+    }
+
+    // NEW: Check if we hit a breakable object (like a chain)
+    BreakableChain breakable = other.GetComponentInParent<BreakableChain>();
+    if (breakable != null)
+    {
+        breakable.TakeDamage(finalDamage);
+        return; // Exit early, we're done
     }
 
     // 2. Check if the thing we hit has health
