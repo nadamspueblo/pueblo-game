@@ -1,179 +1,379 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-/// <summary>
-/// AI controller for a companion dog that follows the player and reacts to the environment.
-/// Uses NavMeshAgent for pathfinding and Animator for animation control.
-/// </summary>
 public class DogAI : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private Transform player; // Drag the player GameObject here in Inspector
-    [SerializeField] private Animator animator; // Reference to the dog's Animator component
-    [SerializeField] private NavMeshAgent agent; // Reference to the NavMeshAgent component
-
-    [Header("Follow Settings")]
-    [SerializeField] private float followDistance = 3f; // Dog stops moving when within this distance
-    [SerializeField] private float idleDistance = 2f; // Dog enters idle state when this close
-    [SerializeField] private float runThreshold = 6f; // Dog runs if farther than this distance
-
-    [Header("Wander Settings")]
-    [SerializeField] private float wanderRadius = 3f; // How far the dog wanders when idle
-    [SerializeField] private float wanderTimer = 5f; // Time between random wander movements
-    private float wanderCountdown;
-
-    [Header("Animation Parameters")]
-    private readonly int speedHash = Animator.StringToHash("Speed"); // Float parameter for blend tree
-    private readonly int isIdlePlayingHash = Animator.StringToHash("IsIdlePlaying"); // Bool for playing animation
-
-    // State tracking
-    private enum DogState { Idle, Following, Running }
+    [SerializeField] private NavMeshAgent agent;
+    [SerializeField] private Animator animator;
+    [SerializeField] private Transform player;
+    
+    [Header("Discovery Settings")]
+    [SerializeField] private float discoveryRange = 5f;
+    private bool isDiscovered = false;
+    
+    [Header("Following Settings")]
+    [SerializeField] private float followDistance = 3f;
+    [SerializeField] private float wanderRadius = 5f;
+    [SerializeField] private float wanderInterval = 5f;
+    
+    [Header("Combat Settings")]
+    [SerializeField] private float detectionRange = 10f;
+    [SerializeField] private float attackRange = 1.5f;
+    [SerializeField] private float attackCooldown = 2f;
+    [SerializeField] private LayerMask zombieLayer;
+    
+    private enum DogState { Idle, Following, Wandering, Attacking }
     private DogState currentState = DogState.Idle;
-
+    
+    private float wanderTimer;
+    private float attackTimer;
+    private Transform currentTarget;
+    
     void Start()
     {
-        // Auto-find references if not assigned
-        if (animator == null) animator = GetComponent<Animator>();
-        if (agent == null) agent = GetComponent<NavMeshAgent>();
+        // Auto-find the NavMeshAgent if not assigned
+        if (agent == null)
+        {
+            agent = GetComponent<NavMeshAgent>();
+        }
         
-        // Find player if not assigned
+        // Auto-find the Animator if not assigned
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+        }
+        
+        // Auto-find the player
         if (player == null)
         {
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-            if (playerObj != null) player = playerObj.transform;
-            else Debug.LogError("DogAI: No player assigned and couldn't find GameObject with 'Player' tag!");
+            if (playerObj != null)
+            {
+                player = playerObj.transform;
+            }
+            else
+            {
+                Debug.LogError("DogAI: Cannot find player! Make sure player has 'Player' tag.");
+            }
         }
-
-        wanderCountdown = wanderTimer;
+        
+        wanderTimer = wanderInterval;
+        
+        Debug.Log("DogAI: Initialized. Waiting to be discovered...");
     }
-
+    
     void Update()
     {
-        if (player == null) return; // Safety check
-
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
-        // Determine state based on distance
-        if (distanceToPlayer > runThreshold)
+        // Check if player has discovered the dog yet
+        if (!isDiscovered)
         {
-            currentState = DogState.Running;
+            CheckForDiscovery();
+            return;
         }
-        else if (distanceToPlayer > followDistance)
-        {
-            currentState = DogState.Following;
-        }
-        else
-        {
-            currentState = DogState.Idle;
-        }
-
-        // Execute behavior based on current state
+        
+        // Decrement attack timer
+        attackTimer -= Time.deltaTime;
+        
+        // Run state machine
         switch (currentState)
         {
             case DogState.Idle:
-                HandleIdle();
+                IdleState();
                 break;
             case DogState.Following:
-                HandleFollowing();
+                FollowingState();
                 break;
-            case DogState.Running:
-                HandleRunning();
+            case DogState.Wandering:
+                WanderingState();
+                break;
+            case DogState.Attacking:
+                AttackingState();
                 break;
         }
-
-        // Update animator with agent's current speed
-        UpdateAnimator();
+        
+        // Always check for zombies threatening the player
+        CheckForThreats();
     }
-
-    /// <summary>
-    /// Idle behavior: Dog stays near player, occasionally wanders or plays
-    /// </summary>
-    private void HandleIdle()
+    
+    // ========== DISCOVERY ==========
+    void CheckForDiscovery()
     {
-        // Stop moving
-        agent.isStopped = true;
-
-        // Random idle playing animation trigger
-        if (Random.value < 0.01f) // 1% chance per frame (~once every few seconds)
+        if (player == null) return;
+        
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        
+        if (distanceToPlayer <= discoveryRange)
         {
-            animator.SetBool(isIdlePlayingHash, true);
+            isDiscovered = true;
+            currentState = DogState.Following;
+            Debug.Log("Dog discovered by player! Now following.");
+        }
+    }
+    
+    // ========== STATE: IDLE ==========
+    void IdleState()
+    {
+        // Just sit still until discovered
+        agent.isStopped = true;
+        
+        if (animator != null)
+        {
+            animator.SetFloat("Speed", 0f);
+        }
+    }
+    
+    // ========== STATE: FOLLOWING ==========
+    void FollowingState()
+    {
+        if (player == null) return;
+        
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        
+        // If too far from player, move closer
+        if (distanceToPlayer > followDistance)
+        {
+            agent.isStopped = false;
+            agent.SetDestination(player.position);
+            
+            if (animator != null)
+            {
+                animator.SetFloat("Speed", agent.velocity.magnitude);
+            }
         }
         else
         {
-            animator.SetBool(isIdlePlayingHash, false);
-        }
-
-        // Optional: Random wander near player
-        wanderCountdown -= Time.deltaTime;
-        if (wanderCountdown <= 0f)
-        {
-            WanderNearPlayer();
-            wanderCountdown = wanderTimer;
-        }
-    }
-
-    /// <summary>
-    /// Following behavior: Dog walks toward player at normal speed
-    /// </summary>
-    private void HandleFollowing()
-    {
-        agent.isStopped = false;
-        agent.speed = 2f; // Walking speed
-        agent.SetDestination(player.position);
-        animator.SetBool(isIdlePlayingHash, false);
-    }
-
-    /// <summary>
-    /// Running behavior: Dog runs quickly to catch up to player
-    /// </summary>
-    private void HandleRunning()
-    {
-        agent.isStopped = false;
-        agent.speed = 5f; // Running speed
-        agent.SetDestination(player.position);
-        animator.SetBool(isIdlePlayingHash, false);
-    }
-
-    /// <summary>
-    /// Makes the dog wander to a random point near the player
-    /// </summary>
-    private void WanderNearPlayer()
-    {
-        Vector3 randomDirection = Random.insideUnitSphere * wanderRadius;
-        randomDirection += player.position;
-
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(randomDirection, out hit, wanderRadius, NavMesh.AllAreas))
-        {
-            agent.isStopped = false;
-            agent.speed = 1.5f;
-            agent.SetDestination(hit.position);
+            // Close enough, maybe wander nearby
+            wanderTimer -= Time.deltaTime;
+            if (wanderTimer <= 0f)
+            {
+                currentState = DogState.Wandering;
+                wanderTimer = wanderInterval;
+            }
+            else
+            {
+                agent.isStopped = true;
+                
+                if (animator != null)
+                {
+                    animator.SetFloat("Speed", 0f);
+                }
+            }
         }
     }
-
-    /// <summary>
-    /// Updates the Animator with the dog's current movement speed
-    /// </summary>
-    private void UpdateAnimator()
-    {
-        // Normalize agent velocity to 0-1 range for blend tree
-        // 0 = idle, 0.5 = walk, 1.0 = run
-        float normalizedSpeed = agent.velocity.magnitude / agent.speed;
-        animator.SetFloat(speedHash, normalizedSpeed);
-    }
-
-    // Visualize follow distances in Scene view
-    private void OnDrawGizmosSelected()
+    
+    // ========== STATE: WANDERING ==========
+    void WanderingState()
     {
         if (player == null) return;
-
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(player.position, idleDistance);
-
+        
+        // Pick a random point near the player
+        if (!agent.hasPath || agent.remainingDistance < 0.5f)
+        {
+            Vector3 randomDirection = Random.insideUnitSphere * wanderRadius;
+            randomDirection += player.position;
+            
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(randomDirection, out hit, wanderRadius, NavMesh.AllAreas))
+            {
+                agent.isStopped = false;
+                agent.SetDestination(hit.position);
+            }
+        }
+        
+        if (animator != null)
+        {
+            animator.SetFloat("Speed", agent.velocity.magnitude);
+        }
+        
+        // After some time, go back to following
+        wanderTimer -= Time.deltaTime;
+        if (wanderTimer <= 0f)
+        {
+            currentState = DogState.Following;
+            wanderTimer = wanderInterval;
+        }
+    }
+    
+    // ========== STATE: ATTACKING ==========
+    void AttackingState()
+    {
+        // If target is dead, gone, or doesn't have health, stop attacking
+        if (currentTarget == null || IsTargetDead())
+        {
+            currentTarget = null;
+            currentState = DogState.Following;
+            Debug.Log("Dog: Target lost or dead, returning to player.");
+            return;
+        }
+        
+        // CHECK: If player is too far away, abandon the fight and follow player
+        if (player != null)
+        {
+            float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+            if (distanceToPlayer > followDistance * 3f) // If player is 3x the normal follow distance
+            {
+                currentTarget = null;
+                currentState = DogState.Following;
+                Debug.Log("Dog: Player too far! Abandoning fight to catch up.");
+                return;
+            }
+        }
+        
+        float distanceToTarget = Vector3.Distance(transform.position, currentTarget.position);
+        
+        // Move toward the zombie
+        if (distanceToTarget > attackRange)
+        {
+            agent.isStopped = false;
+            agent.SetDestination(currentTarget.position);
+            
+            if (animator != null)
+            {
+                animator.SetFloat("Speed", agent.velocity.magnitude);
+            }
+        }
+        else
+        {
+            // Close enough to bite
+            agent.isStopped = true;
+            
+            if (animator != null)
+            {
+                animator.SetFloat("Speed", 0f);
+            }
+            
+            // Face the zombie
+            Vector3 direction = (currentTarget.position - transform.position).normalized;
+            Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
+            
+            // Attack if cooldown is ready
+            if (attackTimer <= 0f)
+            {
+                PerformBiteAttack();
+                attackTimer = attackCooldown;
+            }
+        }
+        
+        // If zombie gets too far, give up
+        if (distanceToTarget > detectionRange * 1.5f)
+        {
+            currentTarget = null;
+            currentState = DogState.Following;
+            Debug.Log("Dog: Zombie too far, returning to player.");
+        }
+    }
+    
+    // ========== CHECK IF TARGET IS DEAD ==========
+    bool IsTargetDead()
+    {
+        if (currentTarget == null) return true;
+        
+        // Try to get the HealthManager component from the zombie
+        HealthManager targetHealth = currentTarget.GetComponent<HealthManager>();
+        
+        // If no HealthManager found, check on parent
+        if (targetHealth == null)
+        {
+            targetHealth = currentTarget.GetComponentInParent<HealthManager>();
+        }
+        
+        // If still no HealthManager, assume it's dead or invalid
+        if (targetHealth == null)
+        {
+            Debug.LogWarning("Dog: Target has no HealthManager, treating as dead.");
+            return true;
+        }
+        
+        // Use the IsDead() method from HealthManager
+        return targetHealth.IsDead();
+    }
+    
+    // ========== THREAT DETECTION ==========
+    void CheckForThreats()
+    {
+        // Only look for threats if not already attacking
+        if (currentState == DogState.Attacking) return;
+        if (player == null) return;
+        
+        // Find all zombies in range using Physics.OverlapSphere
+        Collider[] zombiesInRange = Physics.OverlapSphere(transform.position, detectionRange, zombieLayer);
+        
+        if (zombiesInRange.Length > 0)
+        {
+            // Find the closest zombie
+            Transform closestZombie = null;
+            float closestDistance = Mathf.Infinity;
+            
+            foreach (Collider zombieCollider in zombiesInRange)
+            {
+                // Skip dead zombies
+                HealthManager zombieHealth = zombieCollider.GetComponent<HealthManager>();
+                if (zombieHealth == null)
+                {
+                    zombieHealth = zombieCollider.GetComponentInParent<HealthManager>();
+                }
+                
+                // Only consider alive zombies (using IsDead method)
+                if (zombieHealth != null && !zombieHealth.IsDead())
+                {
+                    float distance = Vector3.Distance(transform.position, zombieCollider.transform.position);
+                    if (distance < closestDistance)
+                    {
+                        closestDistance = distance;
+                        closestZombie = zombieCollider.transform;
+                    }
+                }
+            }
+            
+            // Only attack if zombie is threatening the player (within 8 units)
+            if (closestZombie != null)
+            {
+                float zombieDistanceToPlayer = Vector3.Distance(closestZombie.position, player.position);
+                
+                if (zombieDistanceToPlayer < 8f)
+                {
+                    currentTarget = closestZombie;
+                    currentState = DogState.Attacking;
+                    Debug.Log("Dog: Detected threat! Attacking zombie.");
+                }
+            }
+        }
+    }
+    
+    // ========== ATTACK EXECUTION ==========
+    void PerformBiteAttack()
+    {
+        Debug.Log("Dog: BITE!");
+        
+        // Trigger the bite animation
+        if (animator != null)
+        {
+            animator.SetTrigger("Bite");
+        }
+    }
+    
+    // This will be called by Animation Event later
+    public void EnableBiteHitbox()
+    {
+        // We'll implement this when we add the damage hitbox
+        Debug.Log("Dog: Hitbox enabled (animation event)");
+    }
+    
+    // ========== DEBUG VISUALIZATION ==========
+    void OnDrawGizmosSelected()
+    {
+        // Yellow = Discovery range
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(player.position, followDistance);
-
+        Gizmos.DrawWireSphere(transform.position, discoveryRange);
+        
+        // Red = Zombie detection range
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(player.position, runThreshold);
+        Gizmos.DrawWireSphere(transform.position, detectionRange);
+        
+        // Magenta = Attack range
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }

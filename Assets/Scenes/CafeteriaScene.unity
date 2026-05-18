@@ -97714,6 +97714,80 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &1837044051 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2294585036415982925, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
+  m_PrefabInstance: {fileID: 4606064127776327894}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1837044052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837044051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3471354cc8b3d43bab2fb22b35b26817, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DogAI
+  agent: {fileID: 0}
+  animator: {fileID: 0}
+  player: {fileID: 0}
+  discoveryRange: 2
+  followDistance: 2
+  wanderRadius: 5
+  wanderInterval: 5
+  detectionRange: 4
+  attackRange: 1.5
+  attackCooldown: 2
+  zombieLayer:
+    serializedVersion: 2
+    m_Bits: 64
+--- !u!195 &1837044053
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837044051}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0.5
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!95 &1837044055
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837044051}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: a6149f04780115a48b6bad836a1fe25b, type: 3}
+  m_Controller: {fileID: 9100000, guid: 455c66a406333420386f7e3ea9704bf5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!43 &1848518511
 Mesh:
   m_ObjectHideFlags: 0
@@ -107231,6 +107305,79 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9207170806698185261, guid: f9583d7f4b1094c0eb7e8660198dac44, type: 3}
   m_PrefabInstance: {fileID: 2008003686}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2011292518 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2348727539250862186, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
+  m_PrefabInstance: {fileID: 4606064127776327894}
+  m_PrefabAsset: {fileID: 0}
+--- !u!195 &2011292521
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2011292518}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.44969082
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 1.7303628
+  m_BaseOffset: 0.8651814
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &2011292522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2011292518}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3471354cc8b3d43bab2fb22b35b26817, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DogAI
+  agent: {fileID: 2011292521}
+  animator: {fileID: 0}
+  player: {fileID: 0}
+  discoveryRange: 5
+  followDistance: 3
+  wanderRadius: 3
+  wanderInterval: 5
+  detectionRange: 10
+  attackRange: 1.5
+  attackCooldown: 2
+  zombieLayer:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!65 &2011292523
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2011292518}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.25226444, y: 0.976133, z: 1.2168479}
+  m_Center: {x: -0.0000011136716, y: 0.3771149, z: -0.15873311}
 --- !u!1001 &2012868764
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -116895,9 +117042,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 669509105105335952, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
+      propertyPath: m_AnimatePhysics
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 669509105105335952, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1117418359264341198, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 149.47125
+      value: 108.21
       objectReference: {fileID: 0}
     - target: {fileID: 1117418359264341198, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
       propertyPath: m_LocalPosition.y
@@ -116905,7 +117060,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1117418359264341198, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 295.99
+      value: 326.79
       objectReference: {fileID: 0}
     - target: {fileID: 1117418359264341198, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
       propertyPath: m_LocalRotation.w
@@ -116939,10 +117094,38 @@ PrefabInstance:
       propertyPath: m_Name
       value: P_GermanShepherd
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 2348727539250862186, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8751119717915618940, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.164
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 669509105105335952, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
+    - {fileID: 4080138974661760719, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2294585036415982925, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1837044053}
+    - targetCorrespondingSourceObject: {fileID: 2294585036415982925, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1837044052}
+    - targetCorrespondingSourceObject: {fileID: 2294585036415982925, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1837044055}
+    - targetCorrespondingSourceObject: {fileID: 2348727539250862186, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2011292523}
+    - targetCorrespondingSourceObject: {fileID: 2348727539250862186, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2011292522}
+    - targetCorrespondingSourceObject: {fileID: 2348727539250862186, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2011292521}
   m_SourcePrefab: {fileID: 100100000, guid: d7f0a2015d40e4198983477d709d4853, type: 3}
 --- !u!1001 &5799036612982062483
 PrefabInstance:
