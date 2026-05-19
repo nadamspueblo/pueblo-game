@@ -30,6 +30,11 @@ public class DogAI : MonoBehaviour
     private float attackTimer;
     private Transform currentTarget;
     
+    // Animation smoothing variables (ADD THESE)
+    private float currentAnimSpeed = 0f;
+    private float currentAnimTurn = 0f;
+
+    
     void Start()
     {
         // Auto-find the NavMeshAgent if not assigned
@@ -94,7 +99,50 @@ public class DogAI : MonoBehaviour
         
         // Always check for zombies threatening the player
         CheckForThreats();
+        
+        // Update animator with current movement
+        UpdateAnimatorParameters();
     }
+    
+    // ========== CALCULATE TURN DIRECTION ==========
+void UpdateAnimatorParameters()
+{
+    if (animator == null || agent == null) return;
+    
+    // Set speed based on agent velocity
+    float speed = agent.velocity.magnitude;
+    animator.SetFloat("Speed", speed);
+    
+    // Calculate turn direction (-1 = left, 0 = forward, 1 = right)
+    if (speed > 0.1f)
+    {
+        // Get the direction the dog is moving
+        Vector3 velocity = agent.velocity.normalized;
+        
+        // Get the direction the dog is facing
+        Vector3 forward = transform.forward;
+        
+        // Calculate the angle between facing direction and movement direction
+        float angle = Vector3.SignedAngle(forward, velocity, Vector3.up);
+        
+        // Normalize to -1 to 1 range (45 degrees = full turn animation)
+        float turn = Mathf.Clamp(angle / 45f, -1f, 1f);
+        
+        animator.SetFloat("Turn", turn);
+        
+        // DEBUG: Print values every second
+        if (Time.frameCount % 60 == 0)
+        {
+            Debug.Log($"Dog Animation - Speed: {speed:F2}, Turn: {turn:F2}, Angle: {angle:F1}");
+        }
+    }
+    else
+    {
+        // Not moving, no turn
+        animator.SetFloat("Turn", 0f);
+    }
+}
+
     
     // ========== DISCOVERY ==========
     void CheckForDiscovery()
@@ -116,11 +164,6 @@ public class DogAI : MonoBehaviour
     {
         // Just sit still until discovered
         agent.isStopped = true;
-        
-        if (animator != null)
-        {
-            animator.SetFloat("Speed", 0f);
-        }
     }
     
     // ========== STATE: FOLLOWING ==========
@@ -135,11 +178,6 @@ public class DogAI : MonoBehaviour
         {
             agent.isStopped = false;
             agent.SetDestination(player.position);
-            
-            if (animator != null)
-            {
-                animator.SetFloat("Speed", agent.velocity.magnitude);
-            }
         }
         else
         {
@@ -153,11 +191,6 @@ public class DogAI : MonoBehaviour
             else
             {
                 agent.isStopped = true;
-                
-                if (animator != null)
-                {
-                    animator.SetFloat("Speed", 0f);
-                }
             }
         }
     }
@@ -179,11 +212,6 @@ public class DogAI : MonoBehaviour
                 agent.isStopped = false;
                 agent.SetDestination(hit.position);
             }
-        }
-        
-        if (animator != null)
-        {
-            animator.SetFloat("Speed", agent.velocity.magnitude);
         }
         
         // After some time, go back to following
@@ -211,7 +239,7 @@ public class DogAI : MonoBehaviour
         if (player != null)
         {
             float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-            if (distanceToPlayer > followDistance * 3f) // If player is 3x the normal follow distance
+            if (distanceToPlayer > followDistance * 3f)
             {
                 currentTarget = null;
                 currentState = DogState.Following;
@@ -227,21 +255,11 @@ public class DogAI : MonoBehaviour
         {
             agent.isStopped = false;
             agent.SetDestination(currentTarget.position);
-            
-            if (animator != null)
-            {
-                animator.SetFloat("Speed", agent.velocity.magnitude);
-            }
         }
         else
         {
             // Close enough to bite
             agent.isStopped = true;
-            
-            if (animator != null)
-            {
-                animator.SetFloat("Speed", 0f);
-            }
             
             // Face the zombie
             Vector3 direction = (currentTarget.position - transform.position).normalized;
